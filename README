@@ -1,0 +1,171 @@
+mesa
+------------------------------------------
+X11 OpenGL libraries
+
+Runtime requirements:
+  cygwin-1.5.19-4
+  libX11_6-1.0.0-1
+  libXext6-1.0.0-1
+  libXt6-1.0.0-1
+
+Build requirements:
+(besides corresponding devel packages)
+  cygwin-1.5.19-4
+  binutils-20050610-1
+  cygport-0.1.0-1
+  gcc-core-3.4.4-1
+  gcc-g++-3.4.4-1
+  make-3.80-1
+  pkg-config-0.20-1
+  sed-4.1.4-1
+  glproto-1.4.3-1
+
+Canonical website:
+  http://xorg.freedesktop.org/
+
+Canonical download:
+  http://ftp.x.org/pub/X11R7.0/src/everything/
+
+-------------------------------------------
+
+Build instructions:
+  unpack mesa-6.5-X-src.tar.bz2
+    if you use setup to install this src package, it will be
+	 unpacked under /usr/src automatically
+  cd /usr/src
+  cygport ./mesa-6.5-X.cygport all
+
+This will create:
+  /usr/src/mesa-6.5-X-src.tar.bz2
+  /usr/src/mesa-6.5-X.tar.bz2
+  /usr/src/mesa-devel-6.5-X.tar.bz2
+  /usr/src/mesa-doc-6.5-X.tar.bz2
+  /usr/src/libGL1-6.5-X.tar.bz2
+  /usr/src/libGLU1-6.5-X.tar.bz2
+  /usr/src/libGLw1-6.5-X.tar.bz2
+  /usr/src/libOSMesa6-6.5-X.tar.bz2
+
+-------------------------------------------
+
+Files included in the binary package:
+
+  /usr/bin/glxgears.exe
+  /usr/bin/glxinfo.exe
+  /usr/share/doc/Cygwin/mesa-6.5.README
+  /usr/share/doc/mesa-6.5/COPYING
+  /usr/share/doc/mesa-6.5/README.CYGWIN
+  /usr/share/doc/mesa-6.5/README.X11
+  /usr/share/doc/mesa-6.5/RELNOTES-6.5
+  /usr/share/doc/mesa-6.5/VERSIONS
+
+Files included in the library package:
+
+  /usr/bin/cygGL-1.dll
+
+  /usr/bin/cygGLU-1.dll
+
+  /usr/bin/cygGLw-1.dll
+
+  /usr/bin/cygOSMesa-6.dll
+
+Files included in the devel package:
+
+  /usr/include/GL/GLwDrawA.h
+  /usr/include/GL/GLwDrawAP.h
+  /usr/include/GL/GLwMDrawA.h
+  /usr/include/GL/GLwMDrawAP.h
+  /usr/include/GL/ggimesa.h
+  /usr/include/GL/gl.h
+  /usr/include/GL/gl_mangle.h
+  /usr/include/GL/glext.h
+  /usr/include/GL/glu.h
+  /usr/include/GL/glu_mangle.h
+  /usr/include/GL/glx.h
+  /usr/include/GL/glx_mangle.h
+  /usr/include/GL/glxext.h
+  /usr/include/GL/osmesa.h
+  /usr/include/GL/xmesa.h
+  /usr/include/GL/xmesa_x.h
+  /usr/include/GL/xmesa_xf86.h
+  /usr/lib/libGL.dll.a
+  /usr/lib/libGLU.dll.a
+  /usr/lib/libGLw.dll.a
+  /usr/lib/libOSMesa.dll.a
+
+Files included in the doc package:
+
+  /usr/share/doc/mesa-6.5/api/MESA_agp_offset.spec
+  /usr/share/doc/mesa-6.5/api/MESA_copy_sub_buffer.spec
+  /usr/share/doc/mesa-6.5/api/MESA_pack_invert.spec
+  /usr/share/doc/mesa-6.5/api/MESA_packed_depth_stencil.spec
+  /usr/share/doc/mesa-6.5/api/MESA_pixmap_colormap.spec
+  /usr/share/doc/mesa-6.5/api/MESA_program_debug.spec
+  /usr/share/doc/mesa-6.5/api/MESA_release_buffers.spec
+  /usr/share/doc/mesa-6.5/api/MESA_resize_buffers.spec
+  /usr/share/doc/mesa-6.5/api/MESA_set_3dfx_mode.spec
+  /usr/share/doc/mesa-6.5/api/MESA_sprite_point.spec
+  /usr/share/doc/mesa-6.5/api/MESA_swap_control.spec
+  /usr/share/doc/mesa-6.5/api/MESA_swap_frame_usage.spec
+  /usr/share/doc/mesa-6.5/api/MESA_trace.spec
+  /usr/share/doc/mesa-6.5/api/MESA_window_pos.spec
+  /usr/share/doc/mesa-6.5/api/MESA_ycbcr_texture.spec
+  /usr/share/doc/mesa-6.5/html/MiniGLX.html
+  /usr/share/doc/mesa-6.5/html/banner.html
+  /usr/share/doc/mesa-6.5/html/bugs.html
+  /usr/share/doc/mesa-6.5/html/conform.html
+  /usr/share/doc/mesa-6.5/html/contents.html
+  /usr/share/doc/mesa-6.5/html/custom.html
+  /usr/share/doc/mesa-6.5/html/cvs_access.html
+  /usr/share/doc/mesa-6.5/html/cvs_branches.html
+  /usr/share/doc/mesa-6.5/html/debugging.html
+  /usr/share/doc/mesa-6.5/html/demos.html
+  /usr/share/doc/mesa-6.5/html/devinfo.html
+  /usr/share/doc/mesa-6.5/html/download.html
+  /usr/share/doc/mesa-6.5/html/envvars.html
+  /usr/share/doc/mesa-6.5/html/extensions.html
+  /usr/share/doc/mesa-6.5/html/faq.html
+  /usr/share/doc/mesa-6.5/html/fbdev-dri.html
+  /usr/share/doc/mesa-6.5/html/games.html
+  /usr/share/doc/mesa-6.5/html/glfbdev-driver.html
+  /usr/share/doc/mesa-6.5/html/glu.html
+  /usr/share/doc/mesa-6.5/html/helpwanted.html
+  /usr/share/doc/mesa-6.5/html/index.html
+  /usr/share/doc/mesa-6.5/html/install.html
+  /usr/share/doc/mesa-6.5/html/intro.html
+  /usr/share/doc/mesa-6.5/html/libraries.html
+  /usr/share/doc/mesa-6.5/html/license.html
+  /usr/share/doc/mesa-6.5/html/lists.html
+  /usr/share/doc/mesa-6.5/html/mangling.html
+  /usr/share/doc/mesa-6.5/html/modelers.html
+  /usr/share/doc/mesa-6.5/html/news.html
+  /usr/share/doc/mesa-6.5/html/osmesa.html
+  /usr/share/doc/mesa-6.5/html/pbuffers.html
+  /usr/share/doc/mesa-6.5/html/perf.html
+  /usr/share/doc/mesa-6.5/html/precompiled.html
+  /usr/share/doc/mesa-6.5/html/relnotes.html
+  /usr/share/doc/mesa-6.5/html/science.html
+  /usr/share/doc/mesa-6.5/html/sourcedocs.html
+  /usr/share/doc/mesa-6.5/html/subset-A.html
+  /usr/share/doc/mesa-6.5/html/subset.html
+  /usr/share/doc/mesa-6.5/html/systems.html
+  /usr/share/doc/mesa-6.5/html/thanks.html
+  /usr/share/doc/mesa-6.5/html/utilities.html
+  /usr/share/doc/mesa-6.5/html/utility.html
+  /usr/share/doc/mesa-6.5/html/webmaster.html
+
+------------------
+
+Port Notes:
+
+----- version 6.5-1 -----
+Version bump.
+glxgears and glxinfo now in the main package; created new devel package.
+Built without PTHREADS; glxgears speed now matches that of xorg-x11-6.8.
+Still without ASM/MMX code, as that seems to cause crashes.
+
+----- version 6.4.2-1 -----
+Initial Cygwin release of modular X11R7.0.
+
+
+Cygwin port maintained by:
+http://cygwinports.dotsrc.org/

@@ -1,0 +1,4 @@
+category: X11
+requires: cygwin libX11 libXext glproto
+sdesc: "X11 OpenGL libraries (development)"
+ldesc: "X11 OpenGL libraries "
