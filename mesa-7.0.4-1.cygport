@@ -1,7 +1,9 @@
 DESCRIPTION="Mesa OpenGL implementation"
 HOMEPAGE="http://www.mesa3d.org/"
-SRC_URI="mirror://sourceforge/mesa3d/MesaLib-${PV}.tar.bz2 \
-	mirror://sourceforge/mesa3d/MesaDemos-${PV}.tar.bz2"
+SRC_URI="mirror://sourceforge/mesa3d/MesaLib-${PV}.tar.bz2
+         mirror://sourceforge/mesa3d/MesaDemos-${PV}.tar.bz2"
+PATCH_URI="7.0.3-cygwin.patch"
+
 SRC_DIR=Mesa-${PV}
 
 PKG_NAMES="mesa libGL1 libGLU1 libGLw1 libOSMesa6 mesa-devel"
