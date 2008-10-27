@@ -1,4 +1,0 @@
-category: X11
-requires: cygwin libGL1 libGLU1 libGLw1 libOSMesa6 libX11-devel libXext-devel glproto
-sdesc: "X11 OpenGL libraries (development)"
-ldesc: "X11 OpenGL libraries "

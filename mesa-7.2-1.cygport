@@ -1,0 +1,67 @@
+DESCRIPTION="Mesa OpenGL implementation"
+HOMEPAGE="http://www.mesa3d.org/"
+SRC_URI="mirror://sourceforge/mesa3d/MesaLib-${PV}.tar.bz2
+         mirror://sourceforge/mesa3d/MesaDemos-${PV}.tar.bz2"
+PATCH_URI="7.2-cygwin.patch"
+
+SRC_DIR=Mesa-${PV}
+
+PKG_NAMES="mesa libGL1 libGL-devel libGLU1 libGLU-devel libGLw1 libGLw-devel
+           libOSMesa7 libOSMesa-devel"
+PKG_HINTS="setup gl gl-dev glu glu-dev glw glw-dev osmesa osmesa-dev"
+mesa_CONTENTS="usr/bin/*.exe usr/share/doc/"
+libGL1_CONTENTS='usr/bin/cygGL-1.dll'
+libGL_devel_CONTENTS="--exclude=glu* usr/include/GL/gl*.h
+                      usr/lib/libGL.* usr/lib/pkgconfig/gl.pc"
+libGLU1_CONTENTS='usr/bin/cygGLU-1.dll'
+libGLU_devel_CONTENTS="usr/include/GL/glu*.h
+                      usr/lib/libGLU.* usr/lib/pkgconfig/glu.pc"
+libGLw1_CONTENTS='usr/bin/cygGLw-1.dll'
+libGLw_devel_CONTENTS="usr/include/GL/GLw*.h
+                       usr/lib/libGLw.* usr/lib/pkgconfig/glw.pc"
+libOSMesa7_CONTENTS='usr/bin/cygOSMesa-7.dll'
+libOSMesa_devel_CONTENTS="usr/include/GL/*mesa*.h usr/lib/libOSMesa.*"
+
+src_compile() {
+	lndirs
+	cd ${B}
+	cygconf \
+		--enable-shared --disable-static \
+		--enable-motif \
+		--disable-asm \
+		--disable-glut \
+		--with-driver=xlib
+
+	cygmake -j1 APP_LIB_DEPS="-lX11"
+
+	cygmake -C src/mesa gl.pc
+	cygmake -C src/glu glu.pc
+	cygmake -C src/glw glw.pc
+}
+
+src_test() {
+	:
+}
+
+src_install() {
+	cd ${B}
+	dobin $(find src -name '*.dll') progs/xdemos/glx{demo,gears,heads,info}.exe
+	dolib lib/*.dll.a
+
+	insinto /usr/include/GL
+	doins include/GL/gl{,ext,u,x,xext,*_mangle}.h
+	doins include/GL/osmesa.h
+	doins src/glw/GLw*A.h
+
+	insinto /usr/lib/pkgconfig
+	doins src/{mesa/gl,glu/glu,glw/glw}.pc
+
+	cd ${S}/docs
+	dodoc COPYING README.CYGWIN
+
+	docinto api
+	dodoc MESA_*.spec
+
+	docinto html
+	dodoc *.html
+}
