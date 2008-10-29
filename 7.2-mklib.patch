@@ -1,6 +1,24 @@
---- origsrc/Mesa-7.2/bin/mklib	2008-10-26 18:15:00.956410900 -0500
-+++ src/Mesa-7.2/bin/mklib	2008-10-26 16:57:50.000000000 -0500
-@@ -833,11 +833,11 @@
+--- origsrc/Mesa-7.2/bin/mklib	2008-10-29 01:06:24.375962900 -0500
++++ src/Mesa-7.2/bin/mklib	2008-10-29 01:09:05.954087900 -0500
+@@ -817,6 +817,17 @@
+ 
+      CYGWIN*)
+ 	# GCC-based environment
++	if [ $NOPREFIX = 1 ] ; then
++	    # No "lib" or ".so" part
++	    echo "mklib: Making CYGWIN shared library: " ${LIBNAME}
++	    OPTS="-shared -Wl,--enable-auto-image-base"
++            if [ "${ALTOPTS}" ] ; then
++                OPTS=${ALTOPTS}
++            fi
++	    rm -f ${LIBNAME}
++	    ${LINK} ${OPTS} ${LDFLAGS} -o ${LIBNAME} ${OBJECTS} ${DEPS}
++	    FINAL_LIBS=${LIBNAME}
++        else
+ 	CYGNAME="cyg${LIBNAME}"     # prefix with "cyg"
+ 	LIBNAME="lib${LIBNAME}"     # prefix with "lib"
+ 
+@@ -833,11 +844,11 @@
              # finish up
              FINAL_LIBS=${LIBNAME}.a
          else
@@ -14,7 +32,7 @@
  
              if [ $CPLUSPLUS = 1 ] ; then
                  LINK="g++"
-@@ -846,16 +846,14 @@
+@@ -846,19 +857,18 @@
              fi
  
              # rm any old libs
@@ -33,13 +51,7 @@
  	    # special case for installing in bin
              FINAL_BINS="${CYGNAME}-${MAJOR}.dll"
          fi
---- origsrc/Mesa-7.2/progs/xdemos/ipc.c	2008-08-25 09:46:42.000000000 -0500
-+++ src/Mesa-7.2/progs/xdemos/ipc.c	2008-10-26 17:08:44.706145900 -0500
-@@ -29,7 +29,6 @@
- #include <string.h>
- #include <sys/types.h>
- #include <netinet/in.h>
--#include <netinet/tcp.h>
- #include <arpa/inet.h>
- #include <netdb.h>
- #include <unistd.h>
++        fi
+ 	;;
+ 
+     'example')

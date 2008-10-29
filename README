@@ -137,6 +137,7 @@ Files included in the binary packages:
 
 (libGL1)
   /usr/bin/cygGL-1.dll
+  /usr/lib/dri/swrast_dri.so
 
 (libGL-devel)
   /usr/include/GL/gl.h
@@ -145,6 +146,7 @@ Files included in the binary packages:
   /usr/include/GL/glx.h
   /usr/include/GL/glx_mangle.h
   /usr/include/GL/glxext.h
+  /usr/include/GL/internal/dri_interface.h
   /usr/lib/libGL.dll.a
   /usr/lib/pkgconfig/gl.pc
 
@@ -176,6 +178,9 @@ Files included in the binary packages:
 ------------------
 
 Port Notes:
+
+----- version 7.2-2 -----
+Add DRI header and module for xorg-server-1.5.
 
 ----- version 7.2-1 -----
 Version bump.

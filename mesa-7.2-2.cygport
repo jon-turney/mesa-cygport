@@ -2,7 +2,9 @@ DESCRIPTION="Mesa OpenGL implementation"
 HOMEPAGE="http://www.mesa3d.org/"
 SRC_URI="mirror://sourceforge/mesa3d/MesaLib-${PV}.tar.bz2
          mirror://sourceforge/mesa3d/MesaDemos-${PV}.tar.bz2"
-PATCH_URI="7.2-cygwin.patch"
+PATCH_URI="7.2-mklib.patch
+           7.2-dri_interface.patch
+           7.2-netinet_tcp.patch"
 
 SRC_DIR=Mesa-${PV}
 
@@ -10,8 +12,8 @@ PKG_NAMES="mesa libGL1 libGL-devel libGLU1 libGLU-devel libGLw1 libGLw-devel
            libOSMesa7 libOSMesa-devel"
 PKG_HINTS="setup gl gl-dev glu glu-dev glw glw-dev osmesa osmesa-dev"
 mesa_CONTENTS="usr/bin/*.exe usr/share/doc/"
-libGL1_CONTENTS='usr/bin/cygGL-1.dll'
-libGL_devel_CONTENTS="--exclude=glu* usr/include/GL/gl*.h
+libGL1_CONTENTS='usr/bin/cygGL-1.dll usr/lib/dri/'
+libGL_devel_CONTENTS="--exclude=glu* usr/include/GL/gl*.h usr/include/GL/internal
                       usr/lib/libGL.* usr/lib/pkgconfig/gl.pc"
 libGLU1_CONTENTS='usr/bin/cygGLU-1.dll'
 libGLU_devel_CONTENTS="usr/include/GL/glu*.h
@@ -37,6 +39,12 @@ src_compile() {
 	cygmake -C src/mesa gl.pc
 	cygmake -C src/glu glu.pc
 	cygmake -C src/glw glw.pc
+
+	cd ${B}/src/mesa/drivers/dri/swrast
+	# _glapi_Dispatch/_glapi_Context are supposed to be defined by
+	# the implementor (i.e. XWin).  The problem is that if there is no
+	# single implementor, then what to resolve against?
+	cygmake DEFINES="-DUSE_XSHM -DIN_DRI_DRIVER" MESA_MODULES="\$(TOP)/lib/libGL.dll.a"
 }
 
 src_test() {
@@ -48,10 +56,17 @@ src_install() {
 	dobin $(find src -name '*.dll') progs/xdemos/glx{demo,gears,heads,info}.exe
 	dolib lib/*.dll.a
 
+	exeinto /usr/lib/dri
+	doexe lib/*_dri.so
+
 	insinto /usr/include/GL
 	doins include/GL/gl{,ext,u,x,xext,*_mangle}.h
 	doins include/GL/osmesa.h
 	doins src/glw/GLw*A.h
+
+	# for building xorg-server
+	insinto /usr/include/GL/internal
+	doins include/GL/internal/dri_interface.h
 
 	insinto /usr/lib/pkgconfig
 	doins src/{mesa/gl,glu/glu,glw/glw}.pc
