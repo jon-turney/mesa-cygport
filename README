@@ -3,19 +3,21 @@ mesa
 X11 OpenGL libraries
 
 Runtime requirements:
-  cygwin-1.5.25-15
-  libX11_6-1.1.5-1
-  libXext6-1.0.4-1
-  libXm2-0.95.0-2
-  libXt6-1.0.5-1
+  cygwin-1.7.0-44
+  libgcc1-4.3.2-2
+  libstdc++6-4.3.2-2
+  libX11_6-1.2-10
+  libXext6-1.0.5-10
+  libXm2-0.95.0-10
+  libXt6-1.0.5-10
 
 Build requirements:
 (besides corresponding devel packages)
   binutils-20080624-2
-  cygport-0.4.2-1
-  gcc-core-3.4.4-3
-  gcc-g++-3.4.4-3
-  make-3.81-1
+  cygport-0.9.6-1
+  gcc4-core-4.3.2-2
+  gcc4-g++-4.3.2-2
+  make-3.81-2
   pkg-config-0.23a-2
   sed-4.1.5-2
   glproto-1.4.9-1
@@ -56,84 +58,84 @@ Files included in the binary packages:
   /usr/bin/glxgears.exe
   /usr/bin/glxheads.exe
   /usr/bin/glxinfo.exe
-  /usr/share/doc/mesa-7.2/COPYING
-  /usr/share/doc/mesa-7.2/README.CYGWIN
-  /usr/share/doc/mesa-7.2/api/MESA_agp_offset.spec
-  /usr/share/doc/mesa-7.2/api/MESA_copy_sub_buffer.spec
-  /usr/share/doc/mesa-7.2/api/MESA_pack_invert.spec
-  /usr/share/doc/mesa-7.2/api/MESA_packed_depth_stencil.spec
-  /usr/share/doc/mesa-7.2/api/MESA_pixmap_colormap.spec
-  /usr/share/doc/mesa-7.2/api/MESA_program_debug.spec
-  /usr/share/doc/mesa-7.2/api/MESA_release_buffers.spec
-  /usr/share/doc/mesa-7.2/api/MESA_resize_buffers.spec
-  /usr/share/doc/mesa-7.2/api/MESA_set_3dfx_mode.spec
-  /usr/share/doc/mesa-7.2/api/MESA_shader_debug.spec
-  /usr/share/doc/mesa-7.2/api/MESA_sprite_point.spec
-  /usr/share/doc/mesa-7.2/api/MESA_swap_control.spec
-  /usr/share/doc/mesa-7.2/api/MESA_swap_frame_usage.spec
-  /usr/share/doc/mesa-7.2/api/MESA_trace.spec
-  /usr/share/doc/mesa-7.2/api/MESA_window_pos.spec
-  /usr/share/doc/mesa-7.2/api/MESA_ycbcr_texture.spec
-  /usr/share/doc/mesa-7.2/html/MiniGLX.html
-  /usr/share/doc/mesa-7.2/html/banner.html
-  /usr/share/doc/mesa-7.2/html/bugs.html
-  /usr/share/doc/mesa-7.2/html/conform.html
-  /usr/share/doc/mesa-7.2/html/contents.html
-  /usr/share/doc/mesa-7.2/html/debugging.html
-  /usr/share/doc/mesa-7.2/html/demos.html
-  /usr/share/doc/mesa-7.2/html/developers.html
-  /usr/share/doc/mesa-7.2/html/devinfo.html
-  /usr/share/doc/mesa-7.2/html/dispatch.html
-  /usr/share/doc/mesa-7.2/html/download.html
-  /usr/share/doc/mesa-7.2/html/envvars.html
-  /usr/share/doc/mesa-7.2/html/extensions.html
-  /usr/share/doc/mesa-7.2/html/faq.html
-  /usr/share/doc/mesa-7.2/html/fbdev-dri.html
-  /usr/share/doc/mesa-7.2/html/games.html
-  /usr/share/doc/mesa-7.2/html/glfbdev-driver.html
-  /usr/share/doc/mesa-7.2/html/glu.html
-  /usr/share/doc/mesa-7.2/html/helpwanted.html
-  /usr/share/doc/mesa-7.2/html/index.html
-  /usr/share/doc/mesa-7.2/html/install.html
-  /usr/share/doc/mesa-7.2/html/intro.html
-  /usr/share/doc/mesa-7.2/html/libraries.html
-  /usr/share/doc/mesa-7.2/html/license.html
-  /usr/share/doc/mesa-7.2/html/lists.html
-  /usr/share/doc/mesa-7.2/html/mangling.html
-  /usr/share/doc/mesa-7.2/html/modelers.html
-  /usr/share/doc/mesa-7.2/html/news.html
-  /usr/share/doc/mesa-7.2/html/osmesa.html
-  /usr/share/doc/mesa-7.2/html/pbuffers.html
-  /usr/share/doc/mesa-7.2/html/perf.html
-  /usr/share/doc/mesa-7.2/html/precompiled.html
-  /usr/share/doc/mesa-7.2/html/relnotes-6.4.1.html
-  /usr/share/doc/mesa-7.2/html/relnotes-6.4.2.html
-  /usr/share/doc/mesa-7.2/html/relnotes-6.4.html
-  /usr/share/doc/mesa-7.2/html/relnotes-6.5.1.html
-  /usr/share/doc/mesa-7.2/html/relnotes-6.5.2.html
-  /usr/share/doc/mesa-7.2/html/relnotes-6.5.3.html
-  /usr/share/doc/mesa-7.2/html/relnotes-6.5.html
-  /usr/share/doc/mesa-7.2/html/relnotes-7.0.1.html
-  /usr/share/doc/mesa-7.2/html/relnotes-7.0.2.html
-  /usr/share/doc/mesa-7.2/html/relnotes-7.0.3.html
-  /usr/share/doc/mesa-7.2/html/relnotes-7.0.4.html
-  /usr/share/doc/mesa-7.2/html/relnotes-7.0.html
-  /usr/share/doc/mesa-7.2/html/relnotes-7.1.html
-  /usr/share/doc/mesa-7.2/html/relnotes-7.2.html
-  /usr/share/doc/mesa-7.2/html/relnotes.html
-  /usr/share/doc/mesa-7.2/html/repository.html
-  /usr/share/doc/mesa-7.2/html/science.html
-  /usr/share/doc/mesa-7.2/html/shading.html
-  /usr/share/doc/mesa-7.2/html/sourcedocs.html
-  /usr/share/doc/mesa-7.2/html/subset-A.html
-  /usr/share/doc/mesa-7.2/html/subset.html
-  /usr/share/doc/mesa-7.2/html/systems.html
-  /usr/share/doc/mesa-7.2/html/thanks.html
-  /usr/share/doc/mesa-7.2/html/utilities.html
-  /usr/share/doc/mesa-7.2/html/utility.html
-  /usr/share/doc/mesa-7.2/html/versions.html
-  /usr/share/doc/mesa-7.2/html/webmaster.html
-  /usr/share/doc/mesa-7.2/html/xlibdriver.html
+  /usr/share/doc/mesa/COPYING
+  /usr/share/doc/mesa/README.CYGWIN
+  /usr/share/doc/mesa/api/MESA_agp_offset.spec
+  /usr/share/doc/mesa/api/MESA_copy_sub_buffer.spec
+  /usr/share/doc/mesa/api/MESA_pack_invert.spec
+  /usr/share/doc/mesa/api/MESA_packed_depth_stencil.spec
+  /usr/share/doc/mesa/api/MESA_pixmap_colormap.spec
+  /usr/share/doc/mesa/api/MESA_program_debug.spec
+  /usr/share/doc/mesa/api/MESA_release_buffers.spec
+  /usr/share/doc/mesa/api/MESA_resize_buffers.spec
+  /usr/share/doc/mesa/api/MESA_set_3dfx_mode.spec
+  /usr/share/doc/mesa/api/MESA_shader_debug.spec
+  /usr/share/doc/mesa/api/MESA_sprite_point.spec
+  /usr/share/doc/mesa/api/MESA_swap_control.spec
+  /usr/share/doc/mesa/api/MESA_swap_frame_usage.spec
+  /usr/share/doc/mesa/api/MESA_trace.spec
+  /usr/share/doc/mesa/api/MESA_window_pos.spec
+  /usr/share/doc/mesa/api/MESA_ycbcr_texture.spec
+  /usr/share/doc/mesa/html/MiniGLX.html
+  /usr/share/doc/mesa/html/banner.html
+  /usr/share/doc/mesa/html/bugs.html
+  /usr/share/doc/mesa/html/conform.html
+  /usr/share/doc/mesa/html/contents.html
+  /usr/share/doc/mesa/html/debugging.html
+  /usr/share/doc/mesa/html/demos.html
+  /usr/share/doc/mesa/html/developers.html
+  /usr/share/doc/mesa/html/devinfo.html
+  /usr/share/doc/mesa/html/dispatch.html
+  /usr/share/doc/mesa/html/download.html
+  /usr/share/doc/mesa/html/envvars.html
+  /usr/share/doc/mesa/html/extensions.html
+  /usr/share/doc/mesa/html/faq.html
+  /usr/share/doc/mesa/html/fbdev-dri.html
+  /usr/share/doc/mesa/html/games.html
+  /usr/share/doc/mesa/html/glfbdev-driver.html
+  /usr/share/doc/mesa/html/glu.html
+  /usr/share/doc/mesa/html/helpwanted.html
+  /usr/share/doc/mesa/html/index.html
+  /usr/share/doc/mesa/html/install.html
+  /usr/share/doc/mesa/html/intro.html
+  /usr/share/doc/mesa/html/libraries.html
+  /usr/share/doc/mesa/html/license.html
+  /usr/share/doc/mesa/html/lists.html
+  /usr/share/doc/mesa/html/mangling.html
+  /usr/share/doc/mesa/html/modelers.html
+  /usr/share/doc/mesa/html/news.html
+  /usr/share/doc/mesa/html/osmesa.html
+  /usr/share/doc/mesa/html/pbuffers.html
+  /usr/share/doc/mesa/html/perf.html
+  /usr/share/doc/mesa/html/precompiled.html
+  /usr/share/doc/mesa/html/relnotes-6.4.1.html
+  /usr/share/doc/mesa/html/relnotes-6.4.2.html
+  /usr/share/doc/mesa/html/relnotes-6.4.html
+  /usr/share/doc/mesa/html/relnotes-6.5.1.html
+  /usr/share/doc/mesa/html/relnotes-6.5.2.html
+  /usr/share/doc/mesa/html/relnotes-6.5.3.html
+  /usr/share/doc/mesa/html/relnotes-6.5.html
+  /usr/share/doc/mesa/html/relnotes-7.0.1.html
+  /usr/share/doc/mesa/html/relnotes-7.0.2.html
+  /usr/share/doc/mesa/html/relnotes-7.0.3.html
+  /usr/share/doc/mesa/html/relnotes-7.0.4.html
+  /usr/share/doc/mesa/html/relnotes-7.0.html
+  /usr/share/doc/mesa/html/relnotes-7.1.html
+  /usr/share/doc/mesa/html/relnotes-7.2.html
+  /usr/share/doc/mesa/html/relnotes.html
+  /usr/share/doc/mesa/html/repository.html
+  /usr/share/doc/mesa/html/science.html
+  /usr/share/doc/mesa/html/shading.html
+  /usr/share/doc/mesa/html/sourcedocs.html
+  /usr/share/doc/mesa/html/subset-A.html
+  /usr/share/doc/mesa/html/subset.html
+  /usr/share/doc/mesa/html/systems.html
+  /usr/share/doc/mesa/html/thanks.html
+  /usr/share/doc/mesa/html/utilities.html
+  /usr/share/doc/mesa/html/utility.html
+  /usr/share/doc/mesa/html/versions.html
+  /usr/share/doc/mesa/html/webmaster.html
+  /usr/share/doc/mesa/html/xlibdriver.html
 
 (libGL1)
   /usr/bin/cygGL-1.dll
@@ -179,38 +181,8 @@ Files included in the binary packages:
 
 Port Notes:
 
------ version 7.2-2 -----
-Add DRI header and module for xorg-server-1.5.
-
------ version 7.2-1 -----
-Version bump.
-
------ version 7.0.4-1 -----
-Version bump.
-
------ version 7.0.3-1 -----
-Version bump.
-
------ version 7.0.2-1 -----
-Version bump.
-
------ version 7.0.1-1 -----
-Version bump.  Obsoleted doc package.
-
------ version 6.5.3-1 -----
-Version bump.
-
------ version 6.5.1-1 -----
-Version bump.
-
------ version 6.5-1 -----
-Version bump.
-glxgears and glxinfo now in the main package; created new devel package.
-Built without PTHREADS; glxgears speed now matches that of xorg-x11-6.8.
-Still without ASM/MMX code, as that seems to cause crashes.
-
------ version 6.4.2-1 -----
-Initial Cygwin release of modular X11R7.0.
+----- version 7.2-10 -----
+Initial release for Cygwin 1.7.
 
 
 Cygwin port maintained by:

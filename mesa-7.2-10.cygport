@@ -3,8 +3,7 @@ HOMEPAGE="http://www.mesa3d.org/"
 SRC_URI="mirror://sourceforge/mesa3d/MesaLib-${PV}.tar.bz2
          mirror://sourceforge/mesa3d/MesaDemos-${PV}.tar.bz2"
 PATCH_URI="7.2-mklib.patch
-           7.2-dri_interface.patch
-           7.2-netinet_tcp.patch"
+           7.2-dri_interface.patch"
 
 SRC_DIR=Mesa-${PV}
 
@@ -23,6 +22,9 @@ libGLw_devel_CONTENTS="usr/include/GL/GLw*.h
                        usr/lib/libGLw.* usr/lib/pkgconfig/glw.pc"
 libOSMesa7_CONTENTS='usr/bin/cygOSMesa-7.dll'
 libOSMesa_devel_CONTENTS="usr/include/GL/*mesa*.h usr/lib/libOSMesa.*"
+
+# gcc-4.3.2-2
+LDFLAGS+=" -shared-libgcc"
 
 src_compile() {
 	lndirs
