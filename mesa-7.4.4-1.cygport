@@ -2,14 +2,12 @@ DESCRIPTION="Mesa OpenGL implementation"
 HOMEPAGE="http://www.mesa3d.org/"
 SRC_URI="mirror://sourceforge/mesa3d/MesaLib-${PV}.tar.bz2
          mirror://sourceforge/mesa3d/MesaDemos-${PV}.tar.bz2"
-PATCH_URI="7.2-mklib.patch
-           7.2-dri_interface.patch"
+PATCH_URI="7.2-mklib.patch"
 
 SRC_DIR=Mesa-${PV}
 
 PKG_NAMES="mesa libGL1 libGL-devel libGLU1 libGLU-devel libGLw1 libGLw-devel
            libOSMesa7 libOSMesa-devel"
-PKG_HINTS="setup gl gl-dev glu glu-dev glw glw-dev osmesa osmesa-dev"
 mesa_CONTENTS="usr/bin/*.exe usr/share/doc/"
 libGL1_CONTENTS='usr/bin/cygGL-1.dll usr/lib/dri/'
 libGL_devel_CONTENTS="--exclude=glu* usr/include/GL/gl*.h usr/include/GL/internal
@@ -23,17 +21,14 @@ libGLw_devel_CONTENTS="usr/include/GL/GLw*.h
 libOSMesa7_CONTENTS='usr/bin/cygOSMesa-7.dll'
 libOSMesa_devel_CONTENTS="usr/include/GL/*mesa*.h usr/lib/libOSMesa.*"
 
-# gcc-4.3.2-2
-LDFLAGS+=" -shared-libgcc"
-
 src_compile() {
 	lndirs
 	cd ${B}
+#		--enable-xcb: only for DRI driver?
 	cygconf \
 		--enable-shared --disable-static \
-		--enable-motif \
-		--disable-asm \
 		--disable-glut \
+		--enable-motif \
 		--with-driver=xlib
 
 	cygmake -j1 APP_LIB_DEPS="-lX11"

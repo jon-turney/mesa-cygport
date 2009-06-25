@@ -1,5 +1,5 @@
 category: X11
-requires: cygwin libGL-devel libGLU1 libstdc++6-devel
+requires: libGL-devel libGLU1 libstdc++6-devel
 external-source: mesa
 sdesc: "X11 OpenGL libraries (utility libdevel)"
 ldesc: "X11 OpenGL libraries "

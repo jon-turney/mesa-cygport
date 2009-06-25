@@ -3,10 +3,10 @@ mesa
 X11 OpenGL libraries
 
 Runtime requirements:
-  cygwin-1.7.0-44
+  cygwin-1.7.0-50
   libgcc1-4.3.2-2
   libstdc++6-4.3.2-2
-  libX11_6-1.2-10
+  libX11_6-1.2.1-1
   libXext6-1.0.5-10
   libXm2-0.95.0-10
   libXt6-1.0.5-10
@@ -14,13 +14,13 @@ Runtime requirements:
 Build requirements:
 (besides corresponding devel packages)
   binutils-20080624-2
-  cygport-0.9.6-1
+  cygport-0.9.7-1
   gcc4-core-4.3.2-2
   gcc4-g++-4.3.2-2
   make-3.81-2
-  pkg-config-0.23a-2
+  pkg-config-0.23b-10
   sed-4.1.5-2
-  glproto-1.4.9-1
+  glproto-1.4.10-1
 
 Canonical website:
   http://mesa3d.org/
@@ -31,23 +31,23 @@ Canonical download:
 -------------------------------------------
 
 Build instructions:
-  unpack mesa-7.2-X-src.tar.bz2
+  unpack mesa-7.4.4-X-src.tar.bz2
     if you use setup to install this src package, it will be
 	 unpacked under /usr/src automatically
   cd /usr/src
-  cygport ./mesa-7.2-X.cygport all
+  cygport ./mesa-7.4.4-X.cygport all
 
 This will create:
-  /usr/src/mesa-7.2-X-src.tar.bz2
-  /usr/src/mesa-7.2-X.tar.bz2
-  /usr/src/libGL-devel-7.2-X.tar.bz2
-  /usr/src/libGL1-7.2-X.tar.bz2
-  /usr/src/libGLU-devel-7.2-X.tar.bz2
-  /usr/src/libGLU1-7.2-X.tar.bz2
-  /usr/src/libGLw-devel-7.2-X.tar.bz2
-  /usr/src/libGLw1-7.2-X.tar.bz2
-  /usr/src/libOSMesa-devel-7.2-X.tar.bz2
-  /usr/src/libOSMesa7-7.2-X.tar.bz2
+  /usr/src/mesa-7.4.4-X-src.tar.bz2
+  /usr/src/mesa-7.4.4-X.tar.bz2
+  /usr/src/libGL-devel-7.4.4-X.tar.bz2
+  /usr/src/libGL1-7.4.4-X.tar.bz2
+  /usr/src/libGLU-devel-7.4.4-X.tar.bz2
+  /usr/src/libGLU1-7.4.4-X.tar.bz2
+  /usr/src/libGLw-devel-7.4.4-X.tar.bz2
+  /usr/src/libGLw1-7.4.4-X.tar.bz2
+  /usr/src/libOSMesa-devel-7.4.4-X.tar.bz2
+  /usr/src/libOSMesa7-7.4.4-X.tar.bz2
 
 -------------------------------------------
 
@@ -122,6 +122,12 @@ Files included in the binary packages:
   /usr/share/doc/mesa/html/relnotes-7.0.html
   /usr/share/doc/mesa/html/relnotes-7.1.html
   /usr/share/doc/mesa/html/relnotes-7.2.html
+  /usr/share/doc/mesa/html/relnotes-7.3.html
+  /usr/share/doc/mesa/html/relnotes-7.4.1.html
+  /usr/share/doc/mesa/html/relnotes-7.4.2.html
+  /usr/share/doc/mesa/html/relnotes-7.4.3.html
+  /usr/share/doc/mesa/html/relnotes-7.4.4.html
+  /usr/share/doc/mesa/html/relnotes-7.4.html
   /usr/share/doc/mesa/html/relnotes.html
   /usr/share/doc/mesa/html/repository.html
   /usr/share/doc/mesa/html/science.html
@@ -180,6 +186,9 @@ Files included in the binary packages:
 ------------------
 
 Port Notes:
+
+----- version 7.4.4-1 -----
+Version bump.
 
 ----- version 7.2-10 -----
 Initial release for Cygwin 1.7.
