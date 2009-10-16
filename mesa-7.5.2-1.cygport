@@ -1,8 +1,8 @@
 DESCRIPTION="Mesa OpenGL implementation"
 HOMEPAGE="http://www.mesa3d.org/"
-SRC_URI="mirror://sourceforge/mesa3d/MesaLib-${PV}.tar.bz2
-         mirror://sourceforge/mesa3d/MesaDemos-${PV}.tar.bz2"
-PATCH_URI="7.2-mklib.patch"
+SRC_URI="ftp://ftp.freedesktop.org/pub/mesa/${PV}/MesaLib-${PV}.tar.bz2
+         ftp://ftp.freedesktop.org/pub/mesa/${PV}/MesaDemos-${PV}.tar.bz2"
+#PATCH_URI="7.5-build-egl.patch"
 
 SRC_DIR=Mesa-${PV}
 
@@ -13,27 +13,36 @@ libGL1_CONTENTS='usr/bin/cygGL-1.dll usr/lib/dri/'
 libGL_devel_CONTENTS="--exclude=glu* usr/include/GL/gl*.h usr/include/GL/internal
                       usr/lib/libGL.* usr/lib/pkgconfig/gl.pc"
 libGLU1_CONTENTS='usr/bin/cygGLU-1.dll'
-libGLU_devel_CONTENTS="usr/include/GL/glu*.h
-                      usr/lib/libGLU.* usr/lib/pkgconfig/glu.pc"
+libGLU_devel_CONTENTS="usr/include/GL/glu*.h usr/lib/libGLU.*
+                       usr/lib/pkgconfig/glu.pc"
 libGLw1_CONTENTS='usr/bin/cygGLw-1.dll'
-libGLw_devel_CONTENTS="usr/include/GL/GLw*.h
-                       usr/lib/libGLw.* usr/lib/pkgconfig/glw.pc"
+libGLw_devel_CONTENTS="usr/include/GL/GLw*.h usr/lib/libGLw.*
+                       usr/lib/pkgconfig/glw.pc"
 libOSMesa7_CONTENTS='usr/bin/cygOSMesa-7.dll'
-libOSMesa_devel_CONTENTS="usr/include/GL/*mesa*.h usr/lib/libOSMesa.*"
+libOSMesa_devel_CONTENTS="usr/include/GL/*mesa*.h usr/lib/libOSMesa.*
+                          usr/lib/pkgconfig/osmesa.pc"
 
 src_compile() {
 	lndirs
+	cd ${S}
+	cygautoreconf
 	cd ${B}
 #		--enable-xcb: only for DRI driver?
 	cygconf \
 		--enable-shared --disable-static \
+		--disable-egl \
+		--disable-gallium \
 		--disable-glut \
 		--enable-motif \
+		--with-demos=demos,glsl,osdemos,redbook,samples,xdemos \
 		--with-driver=xlib
+
+	mkdir -p lib
+	ln -sf /usr/lib/libGLEW.dll.a lib/libGLEW.dll.a
 
 	cygmake -j1 APP_LIB_DEPS="-lX11"
 
-	cygmake -C src/mesa gl.pc
+	cygmake -C src/mesa gl.pc osmesa.pc
 	cygmake -C src/glu glu.pc
 	cygmake -C src/glw glw.pc
 
@@ -51,10 +60,13 @@ src_test() {
 src_install() {
 	cd ${B}
 	dobin $(find src -name '*.dll') progs/xdemos/glx{demo,gears,heads,info}.exe
-	dolib lib/*.dll.a
+	dolib lib/libGL{,U,w}.dll.a lib/libOSMesa.dll.a # lib/libEGL.dll.a
 
 	exeinto /usr/lib/dri
 	doexe lib/*_dri.so
+
+#	insinto /usr/include/EGL
+#	doins include/EGL/*.h
 
 	insinto /usr/include/GL
 	doins include/GL/gl{,ext,u,x,xext,*_mangle}.h
@@ -66,7 +78,7 @@ src_install() {
 	doins include/GL/internal/dri_interface.h
 
 	insinto /usr/lib/pkgconfig
-	doins src/{mesa/gl,glu/glu,glw/glw}.pc
+	doins src/mesa/{gl,osmesa}.pc src/glu/glu.pc src/glw/glw.pc
 
 	cd ${S}/docs
 	dodoc COPYING README.CYGWIN
