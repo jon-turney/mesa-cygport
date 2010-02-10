@@ -34,11 +34,11 @@ src_compile() {
 		--disable-gallium \
 		--disable-glut \
 		--enable-motif \
-		--with-demos=demos,glsl,osdemos,redbook,samples,xdemos \
+		--with-demos=demos,glsl,redbook,samples,xdemos \
 		--with-driver=xlib
 
 	mkdir -p lib
-	ln -sf /usr/lib/libGLEW.dll.a lib/libGLEW.dll.a
+	ln -sf /usr/lib/libGLEW.dll.a lib/libGLEW.dll.a || true
 
 	cygmake -j1 APP_LIB_DEPS="-lX11"
 
