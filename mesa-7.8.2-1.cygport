@@ -2,16 +2,20 @@ DESCRIPTION="Mesa OpenGL implementation"
 HOMEPAGE="http://www.mesa3d.org/"
 SRC_URI="ftp://ftp.freedesktop.org/pub/mesa/${PV}/MesaLib-${PV}.tar.bz2
          ftp://ftp.freedesktop.org/pub/mesa/${PV}/MesaDemos-${PV}.tar.bz2"
-#PATCH_URI="7.5-build-egl.patch"
+SRC_DIR="Mesa-${PV}"
 
-SRC_DIR=Mesa-${PV}
+PATCH_URI="
+	7.8.2-cygwin-dri.patch
+	7.8.2-dri-drivers-link.patch
+	7.8.2-egl-build.patch
+"
 
-PKG_NAMES="mesa libGL1 libGL-devel libGLU1 libGLU-devel libGLw1 libGLw-devel
-           libOSMesa7 libOSMesa-devel"
+PKG_NAMES="mesa libGL1 libGL-devel libGLU1 libGLU-devel libGLw1 libGLw-devel"
+#           libOSMesa7 libOSMesa-devel"
 mesa_CONTENTS="usr/bin/*.exe usr/share/doc/"
 libGL1_CONTENTS='usr/bin/cygGL-1.dll usr/lib/dri/'
 libGL_devel_CONTENTS="--exclude=glu* usr/include/GL/gl*.h usr/include/GL/internal
-                      usr/lib/libGL.* usr/lib/pkgconfig/gl.pc"
+                      usr/lib/libGL.* usr/lib/pkgconfig/dri.pc usr/lib/pkgconfig/gl.pc"
 libGLU1_CONTENTS='usr/bin/cygGLU-1.dll'
 libGLU_devel_CONTENTS="usr/include/GL/glu*.h usr/lib/libGLU.*
                        usr/lib/pkgconfig/glu.pc"
@@ -27,30 +31,24 @@ src_compile() {
 	cd ${S}
 	cygautoreconf
 	cd ${B}
-#		--enable-xcb: only for DRI driver?
 	cygconf \
 		--enable-shared --disable-static \
 		--disable-egl \
 		--disable-gallium \
 		--disable-glut \
 		--enable-motif \
-		--with-demos=demos,glsl,redbook,samples,xdemos \
-		--with-driver=xlib
+		--enable-xcb \
+		--with-demos \
+		--with-driver=dri --with-dri-drivers=swrast
 
-	mkdir -p lib
-	ln -sf /usr/lib/libGLEW.dll.a lib/libGLEW.dll.a || true
+#	mkdir -p lib
+#	ln -sf /usr/lib/libGLEW.dll.a lib/libGLEW.dll.a || true
 
-	cygmake -j1 APP_LIB_DEPS="-lX11"
+	cygmake -j1
 
-	cygmake -C src/mesa gl.pc osmesa.pc
+	cygmake -C src/mesa gl.pc # osmesa.pc
 	cygmake -C src/glu glu.pc
 	cygmake -C src/glw glw.pc
-
-	cd ${B}/src/mesa/drivers/dri/swrast
-	# _glapi_Dispatch/_glapi_Context are supposed to be defined by
-	# the implementor (i.e. XWin).  The problem is that if there is no
-	# single implementor, then what to resolve against?
-	cygmake DEFINES="-DUSE_XSHM -DIN_DRI_DRIVER" MESA_MODULES="\$(TOP)/lib/libGL.dll.a"
 }
 
 src_test() {
@@ -60,17 +58,20 @@ src_test() {
 src_install() {
 	cd ${B}
 	dobin $(find src -name '*.dll') progs/xdemos/glx{demo,gears,heads,info}.exe
-	dolib lib/libGL{,U,w}.dll.a lib/libOSMesa.dll.a # lib/libEGL.dll.a
+	dolib lib/libGL{,U,w}.dll.a # lib/libOSMesa.dll.a # lib/libEGL.dll.a
 
 	exeinto /usr/lib/dri
 	doexe lib/*_dri.so
+
+#	exeinto /usr/lib/egl
+#	doexe lib/egl_*.so
 
 #	insinto /usr/include/EGL
 #	doins include/EGL/*.h
 
 	insinto /usr/include/GL
 	doins include/GL/gl{,ext,u,x,xext,*_mangle}.h
-	doins include/GL/osmesa.h
+#	doins include/GL/osmesa.h
 	doins src/glw/GLw*A.h
 
 	# for building xorg-server
@@ -78,7 +79,7 @@ src_install() {
 	doins include/GL/internal/dri_interface.h
 
 	insinto /usr/lib/pkgconfig
-	doins src/mesa/{gl,osmesa}.pc src/glu/glu.pc src/glw/glw.pc
+	doins src/mesa/gl.pc src/glu/glu.pc src/glw/glw.pc src/mesa/drivers/dri/dri.pc
 
 	cd ${S}/docs
 	dodoc COPYING README.CYGWIN

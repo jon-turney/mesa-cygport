@@ -1,5 +1,5 @@
 category: X11
-requires: libGL-devel libGLw1 libX11-devel libXm-devel libXt-devel
+requires: libGL-devel libGLw1 libX11-devel libXext-devel libXm-devel libXt-devel
 external-source: mesa
 sdesc: "X11 OpenGL libraries (widgets libdevel)"
 ldesc: "X11 OpenGL libraries "
