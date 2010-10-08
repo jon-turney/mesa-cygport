@@ -8,6 +8,7 @@ PATCH_URI="
 	7.8.2-cygwin-dri.patch
 	7.8.2-dri-drivers-link.patch
 	7.8.2-egl-build.patch
+	7.8.2-GL_DEPTH_STENCIL_NV.patch
 "
 
 PKG_NAMES="mesa libGL1 libGL-devel libGLU1 libGLU-devel libGLw1 libGLw-devel"
@@ -39,10 +40,7 @@ src_compile() {
 		--enable-motif \
 		--enable-xcb \
 		--with-demos \
-		--with-driver=dri --with-dri-drivers=swrast
-
-#	mkdir -p lib
-#	ln -sf /usr/lib/libGLEW.dll.a lib/libGLEW.dll.a || true
+		--with-driver=dri
 
 	cygmake -j1
 

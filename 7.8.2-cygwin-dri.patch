@@ -1,6 +1,6 @@
---- origsrc/Mesa-7.8.2/configure.ac	2010-06-16 11:44:25.000000000 -0500
-+++ src/Mesa-7.8.2/configure.ac	2010-10-04 14:18:43.966453100 -0500
-@@ -617,17 +617,32 @@ dri)
+--- origsrc/Mesa-7.8.2/configure.ac	2010-10-07 15:19:55.015847300 -0500
++++ src/Mesa-7.8.2/configure.ac	2010-10-07 15:23:25.318945000 -0500
+@@ -617,17 +617,25 @@ dri)
          AC_MSG_ERROR([Can't use static libraries for DRI drivers])
      fi
  
@@ -13,14 +13,13 @@
 +
 +    case "$host_os" in
 +    cygwin*|darwin*)
-+        DEFINES="$DEFINES -DNO_LIBDRM"
 +        ;;
 +    *)
 +        # Check for libdrm
-+        PKG_CHECK_MODULES([LIBDRM], [libdrm >= $LIBDRM_REQUIRED])
++        PKG_CHECK_MODULES([LIBDRM], [libdrm >= $LIBDRM_REQUIRED xxf86vm])
 +        PKG_CHECK_MODULES([DRI2PROTO], [dri2proto >= $DRI2PROTO_REQUIRED])
-+        GL_PC_REQ_PRIV="libdrm >= $LIBDRM_REQUIRED dri2proto >= $DRI2PROTO_REQUIRED glproto >= $GLPROTO_REQUIRED"
-+        DRI_PC_REQ_PRIV="libdrm >= $LIBDRM_REQUIRED"
++        GL_PC_REQ_PRIV="libdrm >= $LIBDRM_REQUIRED xxf86vm dri2proto >= $DRI2PROTO_REQUIRED glproto >= $GLPROTO_REQUIRED"
++        DRI_PC_REQ_PRIV="libdrm >= $LIBDRM_REQUIRED xxf86vm"
 +        ;;
 +    esac
  
@@ -30,128 +29,63 @@
 -        dri_modules="x11 xext xxf86vm xdamage xfixes"
 +        dri_modules="x11 xext xdamage xfixes"
 +
-+        PKG_CHECK_MODULES([XF86VIDMODE], [xxf86vm], have_xf86vidmode=yes, have_xf86vidmode=no)
-+        if test "$have_xf86vidmode" = yes ; then
-+            dri_modules="$dri_modules xxf86vm"
-+            X11_INCLUDES="$X11_INCLUDES -DXF86VIDMODE"
-+        fi
-+
          if test "$enable_xcb" = yes; then
              dri_modules="$dri_modules x11-xcb xcb-glx"
          fi
-@@ -800,6 +815,15 @@ if test "$mesa_driver" = dri; then
+@@ -800,6 +809,12 @@ if test "$mesa_driver" = dri; then
              DEFINES="$DEFINES -DGLX_DIRECT_RENDERING"
          fi
          ;;
 +    cygwin*)
 +        DEFINES="$DEFINES -DUSE_EXTERNAL_DXTN_LIB=1 -DIN_DRI_DRIVER"
 +        DEFINES="$DEFINES -DGLX_INDIRECT_RENDERING"
-+        if test "x$driglx_direct" = xyes; then
-+            DEFINES="$DEFINES -DGLX_DIRECT_RENDERING"
-+        fi
 +        if test "x$DRI_DIRS" = "xyes"; then
 +            DRI_DIRS="swrast"
 +        fi
      esac
  
      # default drivers
---- origsrc/Mesa-7.8.2/src/glx/Makefile	2010-06-15 12:43:42.000000000 -0500
-+++ src/Mesa-7.8.2/src/glx/Makefile	2010-10-04 00:17:21.471191200 -0500
-@@ -1,9 +1,17 @@
- TOP = ../..
- include $(TOP)/configs/current
+--- origsrc/Mesa-7.8.2/src/glx/dri_common.c	2010-10-07 15:19:55.020847600 -0500
++++ src/Mesa-7.8.2/src/glx/dri_common.c	2010-10-07 15:08:02.000000000 -0500
+@@ -106,7 +106,11 @@ driOpenDriver(const char *driverName)
+    int len;
  
--EXTRA_DEFINES = -DXF86VIDMODE -D_REENTRANT \
-+EXTRA_DEFINES = -D_REENTRANT \
-                 -DDEFAULT_DRIVER_DIR=\"$(DRI_DRIVER_SEARCH_DIR)\"
- 
-+ifdef HAVE_LIBDRM
-+DRI_SOURCES = \
-+	  dri_glx.c \
-+	  XF86dri.c \
-+	  dri2_glx.c \
-+	  dri2.c
-+endif
-+
- SOURCES = \
- 	  glcontextmodes.c \
- 	  clientattrib.c \
-@@ -33,11 +41,8 @@ SOURCES = \
- 	  glx_query.c \
- 	  drisw_glx.c \
- 	  dri_common.c \
--	  dri_glx.c \
--	  XF86dri.c \
- 	  glxhash.c \
--	  dri2_glx.c \
--	  dri2.c
-+	  $(DRI_SOURCES)
- 
- GLAPI_LIB = $(TOP)/src/mesa/libglapi.a
- 
---- origsrc/Mesa-7.8.2/src/glx/glxcmds.c	2010-06-15 12:43:47.000000000 -0500
-+++ src/Mesa-7.8.2/src/glx/glxcmds.c	2010-10-03 20:29:22.033170700 -0500
-@@ -46,7 +46,9 @@
- #define GC_IS_DIRECT(gc) ((gc)->isDirect)
- #else
- #include <sys/time.h>
-+#ifdef XF86VIDMODE
- #include <X11/extensions/xf86vmode.h>
+    /* Attempt to make sure libGL symbols will be visible to the driver */
++#ifdef __CYGWIN__
++   glhandle = dlopen("cygGL-1.dll", RTLD_NOW | RTLD_GLOBAL);
++#else
+    glhandle = dlopen("libGL.so.1", RTLD_NOW | RTLD_GLOBAL);
 +#endif
- #include "xf86dri.h"
- #define GC_IS_DIRECT(gc) ((gc)->driContext != NULL)
- #endif
-@@ -3273,7 +3275,7 @@ static const struct name_address_pair GL
-    GLX_FUNCTION2(glXReleaseTexImageEXT, __glXReleaseTexImageEXT),
- #endif
  
--#if defined(GLX_DIRECT_RENDERING) && !defined(GLX_USE_APPLEGL)
-+#if defined(GLX_DIRECT_RENDERING) && !defined(GLX_USE_APPLEGL) && !defined(NO_LIBDRM)
-    /*** DRI configuration ***/
-    GLX_FUNCTION(glXGetScreenDriver),
-    GLX_FUNCTION(glXGetDriverConfig),
+    libPaths = NULL;
+    if (geteuid() == getuid()) {
 --- origsrc/Mesa-7.8.2/src/glx/glxext.c	2010-06-15 12:43:47.000000000 -0500
-+++ src/Mesa-7.8.2/src/glx/glxext.c	2010-10-04 00:17:49.768770800 -0500
++++ src/Mesa-7.8.2/src/glx/glxext.c	2010-10-07 15:15:18.195676600 -0500
 @@ -41,7 +41,9 @@
  #include "glxclient.h"
  #include <X11/extensions/Xext.h>
  #include <X11/extensions/extutil.h>
-+#ifndef NO_LIBDRM
++#ifdef GLX_DIRECT_RENDERING
  #include <X11/extensions/dri2proto.h>
 +#endif
  #ifdef GLX_USE_APPLEGL
  #include "apple_glx.h"
  #include "apple_visual.h"
-@@ -887,10 +889,12 @@ __glXInitialize(Display * dpy)
-     ** Note: This _must_ be done before calling any other DRI routines
-     ** (e.g., those called in AllocAndFetchScreenConfigs).
-     */
-+#ifndef NO_LIBDRM
-    if (glx_direct && glx_accel) {
-       dpyPriv->dri2Display = dri2CreateDisplay(dpy);
-       dpyPriv->driDisplay = driCreateDisplay(dpy);
-    }
+--- origsrc/Mesa-7.8.2/src/mesa/main/dlopen.c	2010-10-07 15:19:55.025847900 -0500
++++ src/Mesa-7.8.2/src/mesa/main/dlopen.c	2010-10-07 15:08:02.000000000 -0500
+@@ -31,6 +31,10 @@
+ #include "compiler.h"
+ #include "dlopen.h"
+ 
++#ifdef __CYGWIN__
++#define _GNU_SOURCE
 +#endif
-    if (glx_direct)
-       dpyPriv->driswDisplay = driswCreateDisplay(dpy);
++
+ #if defined(_GNU_SOURCE) && !defined(__MINGW32__) && !defined(__blrts)
+ #include <dlfcn.h>
  #endif
---- origsrc/Mesa-7.8.2/src/glx/xf86dri.h	2010-04-27 16:41:21.000000000 -0500
-+++ src/Mesa-7.8.2/src/glx/xf86dri.h	2010-10-03 20:30:43.457038400 -0500
-@@ -39,7 +39,12 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN
- #define _XF86DRI_H_
- 
- #include <X11/Xfuncproto.h>
-+#ifndef NO_LIBDRM
- #include <xf86drm.h>
-+#else
-+typedef unsigned int drm_handle_t;
-+typedef unsigned int drm_magic_t;
-+#endif
- 
- #define X_XF86DRIQueryVersion                   0
- #define X_XF86DRIQueryDirectRenderingCapable    1
---- origsrc/Mesa-7.8.2/src/mesa/main/texcompress_s3tc.c	2010-06-15 12:43:43.000000000 -0500
-+++ src/Mesa-7.8.2/src/mesa/main/texcompress_s3tc.c	2010-10-03 20:31:20.890291200 -0500
+--- origsrc/Mesa-7.8.2/src/mesa/main/texcompress_s3tc.c	2010-10-07 15:19:55.030848200 -0500
++++ src/Mesa-7.8.2/src/mesa/main/texcompress_s3tc.c	2010-10-07 15:08:02.000000000 -0500
 @@ -48,7 +48,7 @@
  #if FEATURE_texture_s3tc
  
