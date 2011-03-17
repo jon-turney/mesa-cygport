@@ -1,0 +1,83 @@
+--- origsrc/Mesa-7.9.1/configure.ac	2011-01-04 11:50:14.000000000 -0600
++++ src/Mesa-7.9.1/configure.ac	2011-01-20 03:22:45.539178500 -0600
+@@ -125,15 +125,12 @@ dnl Compiler macros
+ DEFINES=""
+ AC_SUBST([DEFINES])
+ case "$host_os" in
+-linux*|*-gnu*|gnu*)
++linux*|*-gnu*|gnu*|cygwin*)
+     DEFINES="$DEFINES -D_GNU_SOURCE -DPTHREADS"
+     ;;
+ solaris*)
+     DEFINES="$DEFINES -DPTHREADS -DSVR4"
+     ;;
+-cygwin*)
+-    DEFINES="$DEFINES -DPTHREADS"
+-    ;;
+ esac
+ 
+ dnl Add flags for gcc and g++
+@@ -625,12 +622,18 @@ dri)
+         AC_MSG_ERROR([Can't use static libraries for DRI drivers])
+     fi
+ 
+-    # Check for libdrm
+-    PKG_CHECK_MODULES([LIBDRM], [libdrm >= $LIBDRM_REQUIRED])
+-    PKG_CHECK_MODULES([DRI2PROTO], [dri2proto >= $DRI2PROTO_REQUIRED])
+     PKG_CHECK_MODULES([GLPROTO], [glproto >= $GLPROTO_REQUIRED])
+-    GL_PC_REQ_PRIV="libdrm >= $LIBDRM_REQUIRED dri2proto >= $DRI2PROTO_REQUIRED glproto >= $GLPROTO_REQUIRED"
+-    DRI_PC_REQ_PRIV="libdrm >= $LIBDRM_REQUIRED"
++
++	case "$host_os" in
++	cygwin*|darwin*)
++        ;;
++	*)	# Check for libdrm
++        PKG_CHECK_MODULES([LIBDRM], [libdrm >= $LIBDRM_REQUIRED])
++        PKG_CHECK_MODULES([DRI2PROTO], [dri2proto >= $DRI2PROTO_REQUIRED])
++        GL_PC_REQ_PRIV="libdrm >= $LIBDRM_REQUIRED dri2proto >= $DRI2PROTO_REQUIRED glproto >= $GLPROTO_REQUIRED"
++        DRI_PC_REQ_PRIV="libdrm >= $LIBDRM_REQUIRED"
++        ;;
++    esac
+ 
+     # find the DRI deps for libGL
+     if test "$x11_pkgconfig" = yes; then
+@@ -876,6 +879,10 @@ if test "$mesa_driver" = dri; then
+             DEFINES="$DEFINES -DGLX_DIRECT_RENDERING"
+         fi
+         ;;
++    cygwin*)
++        DEFINES="$DEFINES -DUSE_EXTERNAL_DXTN_LIB=1 -DIN_DRI_DRIVER"
++        DEFINES="$DEFINES -DGLX_INDIRECT_RENDERING"
++	;;
+     esac
+ 
+     # default drivers
+--- origsrc/Mesa-7.9.1/src/glx/dri_common.c	2010-12-14 15:46:56.000000000 -0600
++++ src/Mesa-7.9.1/src/glx/dri_common.c	2011-01-20 03:21:49.368965700 -0600
+@@ -104,8 +104,14 @@ driOpenDriver(const char *driverName)
+    char realDriverName[200];
+    int len;
+ 
++#ifdef __CYGWIN__
++#define LIBGL_SO "cygGL-1.dll"
++#else
++#define LIBGL_SO "libGL.so.1"
++#endif
++
+    /* Attempt to make sure libGL symbols will be visible to the driver */
+-   glhandle = dlopen("libGL.so.1", RTLD_NOW | RTLD_GLOBAL);
++   glhandle = dlopen(LIBGL_SO, RTLD_NOW | RTLD_GLOBAL);
+ 
+    libPaths = NULL;
+    if (geteuid() == getuid()) {
+--- origsrc/Mesa-7.9.1/src/mesa/main/texcompress_s3tc.c	2010-12-15 15:50:00.000000000 -0600
++++ src/Mesa-7.9.1/src/mesa/main/texcompress_s3tc.c	2011-01-20 03:23:44.929575400 -0600
+@@ -48,7 +48,7 @@
+ #if FEATURE_texture_s3tc
+ 
+ 
+-#if defined(_WIN32) || defined(WIN32)
++#if defined(_WIN32) || defined(WIN32) || defined(__CYGWIN__)
+ #define DXTN_LIBNAME "dxtn.dll"
+ #define RTLD_LAZY 0
+ #define RTLD_GLOBAL 0

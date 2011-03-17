@@ -1,4 +1,4 @@
 category: X11
-requires: libgcc1 libGL1 libX11_6
-sdesc: "X11 OpenGL libraries (demos)"
+requires: mesa-demos
+sdesc: "X11 OpenGL libraries (sources)"
 ldesc: "X11 OpenGL libraries "

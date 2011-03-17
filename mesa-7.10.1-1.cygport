@@ -1,20 +1,18 @@
 DESCRIPTION="Mesa OpenGL implementation"
 HOMEPAGE="http://www.mesa3d.org/"
-SRC_URI="ftp://ftp.freedesktop.org/pub/mesa/${PV}/MesaLib-${PV}.tar.bz2
-         ftp://ftp.freedesktop.org/pub/mesa/${PV}/MesaDemos-${PV}.tar.bz2"
+SRC_URI="ftp://ftp.freedesktop.org/pub/mesa/${PV}/MesaLib-${PV}.tar.bz2"
 SRC_DIR="Mesa-${PV}"
 
 PATCH_URI="
-	7.8.2-cygwin-dri.patch
-	7.8.2-dri-drivers-link.patch
+	7.9.1-cygwin-dri.patch
+	7.9.1-dri-drivers-link.patch
 	7.8.2-egl-build.patch
 	7.8.2-GL_DEPTH_STENCIL_NV.patch
 "
 
 PKG_NAMES="mesa libGL1 libGL-devel libGLU1 libGLU-devel libGLw1 libGLw-devel"
 #           libOSMesa7 libOSMesa-devel"
-mesa_CONTENTS="usr/bin/*.exe usr/share/doc/"
-libGL1_CONTENTS='usr/bin/cygGL-1.dll usr/lib/dri/'
+libGL1_CONTENTS='usr/bin/cygGL-1.dll usr/lib/dri/ usr/share/doc/'
 libGL_devel_CONTENTS="--exclude=glu* usr/include/GL/gl*.h usr/include/GL/internal
                       usr/lib/libGL.* usr/lib/pkgconfig/dri.pc usr/lib/pkgconfig/gl.pc"
 libGLU1_CONTENTS='usr/bin/cygGLU-1.dll'
@@ -39,8 +37,8 @@ src_compile() {
 		--disable-glut \
 		--enable-motif \
 		--enable-xcb \
-		--with-demos \
-		--with-driver=dri
+		--with-driver=dri \
+		--with-dri-drivers=swrast
 
 	cygmake -j1
 
@@ -55,7 +53,7 @@ src_test() {
 
 src_install() {
 	cd ${B}
-	dobin $(find src -name '*.dll') progs/xdemos/glx{demo,gears,heads,info}.exe
+	dobin lib/*.dll
 	dolib lib/libGL{,U,w}.dll.a # lib/libOSMesa.dll.a # lib/libEGL.dll.a
 
 	exeinto /usr/lib/dri
@@ -76,8 +74,7 @@ src_install() {
 	insinto /usr/include/GL/internal
 	doins include/GL/internal/dri_interface.h
 
-	insinto /usr/lib/pkgconfig
-	doins src/mesa/gl.pc src/glu/glu.pc src/glw/glw.pc src/mesa/drivers/dri/dri.pc
+	dopkgconfig src/mesa/gl.pc src/glu/glu.pc src/glw/glw.pc src/mesa/drivers/dri/dri.pc
 
 	cd ${S}/docs
 	dodoc COPYING README.CYGWIN
