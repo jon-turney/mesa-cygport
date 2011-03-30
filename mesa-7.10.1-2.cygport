@@ -8,6 +8,7 @@ PATCH_URI="
 	7.9.1-dri-drivers-link.patch
 	7.8.2-egl-build.patch
 	7.8.2-GL_DEPTH_STENCIL_NV.patch
+	7.10.1-glean-quick.patch
 "
 
 PKG_NAMES="mesa libGL1 libGL-devel libGLU1 libGLU-devel libGLw1 libGLw-devel"

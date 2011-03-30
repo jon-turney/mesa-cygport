@@ -1,0 +1,16 @@
+Patch by Kristian Høgsberg:
+
+http://bugs.freedesktop.org/show_bug.cgi?id=30089#c5
+
+diff --git a/src/glx/glxcmds.c b/src/glx/glxcmds.c
+index 4f7e84e..cb474ac 100644
+--- a/src/glx/glxcmds.c
++++ b/src/glx/glxcmds.c
+@@ -368,6 +368,7 @@ DestroyContext(Display * dpy, GLXContext ctx)
+       if (!gc->imported)
+         glx_send_destroy_context(dpy, gc->xid);
+       gc->xid = None;
++      gc->currentContextTag = 0;
+       __glXUnlock();
+       return;
+    }
