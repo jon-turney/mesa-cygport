@@ -1,0 +1,46 @@
+--- origsrc/Mesa-7.11.2/src/egl/drivers/glx/egl_glx.c	2011-10-14 19:43:58.000000000 -0500
++++ src/Mesa-7.11.2/src/egl/drivers/glx/egl_glx.c	2011-12-23 02:02:40.858300100 -0600
+@@ -1053,7 +1053,13 @@ GLX_Load(_EGLDriver *drv)
+    struct GLX_egl_driver *GLX_drv = GLX_egl_driver(drv);
+    void *handle;
+ 
+-   handle = dlopen("libGL.so", RTLD_LAZY | RTLD_LOCAL);
++#ifdef __CYGWIN__
++#define LIBGL_SO "cygGL-1.dll"
++#else
++#define LIBGL_SO "libGL.so.1"
++#endif
++
++   handle = dlopen(LIBGL_SO, RTLD_LAZY | RTLD_LOCAL);
+    if (!handle)
+       goto fail;
+ 
+--- origsrc/Mesa-7.11.2/src/glx/dri_common.c	2011-12-23 02:05:00.515288100 -0600
++++ src/Mesa-7.11.2/src/glx/dri_common.c	2011-12-23 00:39:51.000000000 -0600
+@@ -104,8 +104,14 @@ driOpenDriver(const char *driverName)
+    char realDriverName[200];
+    int len;
+ 
++#ifdef __CYGWIN__
++#define LIBGL_SO "cygGL-1.dll"
++#else
++#define LIBGL_SO "libGL.so.1"
++#endif
++
+    /* Attempt to make sure libGL symbols will be visible to the driver */
+-   glhandle = dlopen("libGL.so.1", RTLD_NOW | RTLD_GLOBAL);
++   glhandle = dlopen(LIBGL_SO, RTLD_NOW | RTLD_GLOBAL);
+ 
+    libPaths = NULL;
+    if (geteuid() == getuid()) {
+--- origsrc/Mesa-7.11.2/src/mesa/main/texcompress_s3tc.c	2011-12-23 02:05:00.518288200 -0600
++++ src/Mesa-7.11.2/src/mesa/main/texcompress_s3tc.c	2011-12-23 02:17:11.418093300 -0600
+@@ -55,6 +55,8 @@
+ #define RTLD_GLOBAL 0
+ #elif defined(__DJGPP__)
+ #define DXTN_LIBNAME "dxtn.dxe"
++#elif defined(__CYGWIN__)
++#define DXTN_LIBNAME "cygtxc_dxtn.dll"
+ #else
+ #define DXTN_LIBNAME "libtxc_dxtn.so"
+ #endif

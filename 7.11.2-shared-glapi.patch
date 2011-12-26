@@ -1,0 +1,35 @@
+--- origsrc/Mesa-7.11.2/src/gallium/targets/Makefile.dri	2011-10-14 19:43:58.000000000 -0500
++++ src/Mesa-7.11.2/src/gallium/targets/Makefile.dri	2011-12-25 13:51:09.605513000 -0600
+@@ -34,6 +34,9 @@ OBJECTS = \
+ 	$(C_SOURCES:.c=.o) \
+ 	$(ASM_SOURCES:.S=.o) 
+ 
++ifeq ($(SHARED_GLAPI),1)
++DRI_LIB_DEPS += -L$(TOP)/$(LIB_DIR) -l$(GLAPI_LIB)
++endif
+ 
+ ### Include directories
+ SHARED_INCLUDES = \
+--- origsrc/Mesa-7.11.2/src/mesa/drivers/dri/Makefile.defines	2011-10-14 19:43:58.000000000 -0500
++++ src/Mesa-7.11.2/src/mesa/drivers/dri/Makefile.defines	2011-12-23 05:38:08.353710600 -0600
+@@ -32,3 +32,7 @@ SHARED_INCLUDES = \
+ 
+ INCLUDES += $(API_DEFINES)
+ CXXFLAGS += $(API_DEFINES)
++
++ifeq ($(SHARED_GLAPI),1)
++DRI_LIB_DEPS += -L$(TOP)/$(LIB_DIR) -l$(GLAPI_LIB)
++endif
+--- origsrc/Mesa-7.11.2/src/mesa/drivers/osmesa/Makefile	2011-07-08 20:31:41.000000000 -0500
++++ src/Mesa-7.11.2/src/mesa/drivers/osmesa/Makefile	2011-12-25 20:43:55.768839300 -0600
+@@ -25,6 +25,10 @@ CORE_MESA = \
+ 	$(TOP)/src/mapi/glapi/libglapi.a \
+ 	$(TOP)/src/glsl/libglsl.a
+ 
++ifeq ($(SHARED_GLAPI),1)
++OSMESA_LIB_DEPS += -L$(TOP)/$(LIB_DIR) -l$(GLAPI_LIB)
++endif
++
+ .c.o:
+ 	$(CC) -c $(INCLUDE_DIRS) $(CFLAGS) $< -o $@
+ 

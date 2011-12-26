@@ -1,0 +1,65 @@
+--- origsrc/Mesa-7.11.2/src/gallium/state_trackers/dri/Makefile	2010-10-05 11:56:51.000000000 -0500
++++ src/Mesa-7.11.2/src/gallium/state_trackers/dri/Makefile	2011-12-25 20:24:31.083487600 -0600
+@@ -2,7 +2,11 @@
+ TOP = ../../../..
+ include $(TOP)/configs/current
+ 
+-SUBDIRS = drm sw
++SUBDIRS = sw
++
++ifneq ($(DRI_DIRS),swrast)
++SUBDIRS += drm
++endif
+ 
+ default install clean:
+ 	@for dir in $(SUBDIRS) ; do \
+--- origsrc/Mesa-7.11.2/src/gallium/state_trackers/egl/Makefile	2011-10-14 19:43:58.000000000 -0500
++++ src/Mesa-7.11.2/src/gallium/state_trackers/egl/Makefile	2011-12-25 20:54:25.038984300 -0600
+@@ -17,8 +17,12 @@ x11_INCLUDES = \
+ 	-I$(TOP)/src/glx \
+ 	-I$(TOP)/src/mapi \
+ 	-I$(TOP)/src/mesa \
+-	$(X11_CFLAGS) \
++	$(X11_CFLAGS)
++
++ifneq ($(DRI_DIRS),swrast)
++x11_INCLUDES += \
+ 	$(shell pkg-config --cflags-only-I libdrm dri2proto)
++endif
+ 
+ x11_SOURCES = $(wildcard x11/*.c) \
+ 	      $(TOP)/src/glx/dri2.c
+--- origsrc/Mesa-7.11.2/src/gallium/state_trackers/egl/x11/x11_screen.c	2011-10-14 19:43:58.000000000 -0500
++++ src/Mesa-7.11.2/src/gallium/state_trackers/egl/x11/x11_screen.c	2011-12-25 13:48:54.244077000 -0600
+@@ -27,7 +27,9 @@
+ #include <fcntl.h>
+ #include <sys/types.h>
+ #include <sys/stat.h>
++#ifdef GLX_DIRECT_RENDERING
+ #include <xf86drm.h>
++#endif
+ #include <X11/Xlibint.h>
+ #include <X11/extensions/XShm.h>
+ 
+@@ -35,7 +37,9 @@
+ #include "egllog.h"
+ 
+ #include "x11_screen.h"
++#ifdef GLX_DIRECT_RENDERING
+ #include "dri2.h"
++#endif
+ #include "glxinit.h"
+ 
+ struct x11_screen {
+--- origsrc/Mesa-7.11.2/src/gallium/state_trackers/egl/x11/x11_screen.h	2011-07-08 20:37:09.000000000 -0500
++++ src/Mesa-7.11.2/src/gallium/state_trackers/egl/x11/x11_screen.h	2011-12-25 13:48:04.589190400 -0600
+@@ -28,7 +28,9 @@
+ 
+ #include <X11/Xlib.h>
+ #include <X11/Xutil.h>
++#ifdef GLX_DIRECT_RENDERING
+ #include <X11/extensions/dri2tokens.h>
++#endif
+ #include "GL/gl.h" /* for GL types needed by __GLcontextModes */
+ #include "glcore.h"  /* for __GLcontextModes */
+ #include "pipe/p_compiler.h"
