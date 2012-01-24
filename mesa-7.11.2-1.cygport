@@ -4,6 +4,7 @@ SRC_URI="ftp://ftp.freedesktop.org/pub/mesa/${PV}/MesaLib-${PV}.tar.bz2"
 SRC_DIR="Mesa-${PV}"
 
 PATCH_URI="
+	mirror://gentoo/${P}-gentoo-patches-01.tar.bz2
 	7.11.2-cygwin-M_PI.patch
 	7.11.2-cygwin-dri.patch
 	7.11.2-cygwin-soname.patch
@@ -38,6 +39,8 @@ libOpenVG_devel_CONTENTS="usr/include/VG/ usr/lib/libOpenVG.* usr/lib/pkgconfig/
 libOSMesa7_CONTENTS="usr/bin/cygOSMesa-7.dll"
 libOSMesa_devel_CONTENTS="usr/include/GL/osmesa.h usr/lib/libOSMesa.* usr/lib/pkgconfig/osmesa.pc"
 dri_drivers_CONTENTS="usr/include/GL/internal/ usr/lib/dri/ usr/lib/pkgconfig/dri.pc"
+
+DIFF_EXCLUDES="docs"
 
 src_compile() {
 	lndirs
