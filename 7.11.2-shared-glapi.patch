@@ -10,6 +10,17 @@
  
  ### Include directories
  SHARED_INCLUDES = \
+--- origsrc/Mesa-7.11.2/src/mapi/glapi/gen-es/Makefile	2011-10-14 19:43:58.000000000 -0500
++++ src/Mesa-7.11.2/src/mapi/glapi/gen-es/Makefile	2012-02-05 00:54:14.549972500 -0600
+@@ -55,7 +55,7 @@ endef
+ %/glapi_mapi_tmp.h: $(MAPI)/mapi_abi.py $(COMMON)
+ 	@mkdir -p $(dir $@)
+ 	$(PYTHON2) $(PYTHON_FLAGS) $< \
+-		--printer $(PRINTER) --mode lib $(GLAPI)/gl_and_es_API.xml > $@
++		--printer $(PRINTER) --mode lib $(GLAPI)/gl_API.xml > $@
+ 
+ %/main/dispatch.h: $(GLAPI)/gl_table.py $(COMMON)
+ 	$(call gen-glapi,-c -m remap_table)
 --- origsrc/Mesa-7.11.2/src/mesa/drivers/dri/Makefile.defines	2011-10-14 19:43:58.000000000 -0500
 +++ src/Mesa-7.11.2/src/mesa/drivers/dri/Makefile.defines	2011-12-23 05:38:08.353710600 -0600
 @@ -32,3 +32,7 @@ SHARED_INCLUDES = \

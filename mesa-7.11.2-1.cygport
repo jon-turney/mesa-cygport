@@ -16,8 +16,8 @@ PATCH_URI="
 
 PKG_NAMES="mesa dri-drivers libglapi0 libglapi-devel libGL1 libGL-devel
            libGLU1 libGLU-devel libGLw1 libGLw-devel libEGL1 libEGL-devel
-           libGLESv1_CM1 libGLESv1_CM-devel libGLESv2_2 libGLESv2-devel
            libOpenVG1 libOpenVG-devel libOSMesa7 libOSMesa-devel"
+#           libGLESv1_CM1 libGLESv1_CM-devel libGLESv2_2 libGLESv2-devel
 mesa_CONTENTS="usr/share/doc/"
 libglapi0_CONTENTS="usr/bin/cygglapi-0.dll"
 libglapi_devel_CONTENTS="usr/lib/libglapi.*"
@@ -53,8 +53,8 @@ src_compile() {
 		--enable-egl \
 		--enable-gallium-egl \
 		--enable-gl-osmesa \
-		--enable-gles1 \
-		--enable-gles2 \
+		--disable-gles1 \
+		--disable-gles2 \
 		--enable-openvg \
 		--disable-glut \
 		--enable-motif \
