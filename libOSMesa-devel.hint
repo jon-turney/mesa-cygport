@@ -1,5 +1,5 @@
 category: X11
-requires: libGL-devel libOSMesa7
+requires: libGL-devel libOSMesa8
 external-source: mesa
 sdesc: "Mesa Off-Screen rendering library (development)"
 ldesc: "Mesa is an open-source implementation of the OpenGL specification,

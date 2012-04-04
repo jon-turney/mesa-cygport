@@ -1,3 +1,14 @@
+--- origsrc/Mesa-8.0.2/configure.ac	2012-04-03 19:28:48.039221700 -0500
++++ src/Mesa-8.0.2/configure.ac	2012-04-03 19:29:13.778693900 -0500
+@@ -1432,7 +1432,7 @@ if test "x$enable_gallium_egl" = xyes; t
+     if test "x$enable_egl" = xno; then
+         AC_MSG_ERROR([cannot enable egl_gallium without EGL])
+     fi
+-    if test "x$have_libdrm" != xyes; then
++    if test "x$driglx_direct" = xyes && test "x$have_libdrm" != xyes; then
+         AC_MSG_ERROR([egl_gallium requires libdrm >= $LIBDRM_REQUIRED])
+     fi
+ 
 --- origsrc/Mesa-7.11.2/src/gallium/state_trackers/dri/Makefile	2010-10-05 11:56:51.000000000 -0500
 +++ src/Mesa-7.11.2/src/gallium/state_trackers/dri/Makefile	2011-12-25 20:24:31.083487600 -0600
 @@ -2,7 +2,11 @@
@@ -24,7 +35,7 @@
 +
 +ifneq ($(DRI_DIRS),swrast)
 +x11_INCLUDES += \
- 	$(shell pkg-config --cflags-only-I libdrm dri2proto)
+ 	$(shell $(PKG_CONFIG) --cflags-only-I libdrm dri2proto)
 +endif
  
  x11_SOURCES = $(wildcard x11/*.c) \

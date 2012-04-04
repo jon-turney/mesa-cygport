@@ -1,5 +1,5 @@
 category: X11
-requires: libgcc1 libglapi0 libllvm3.0 libOpenVG1 libstdc++6 libX11_6 libXext6
+requires: libgcc1 libGL1 libglapi0 libllvm3.0 libOpenVG1 libstdc++6 libX11_6 libXext6
 external-source: mesa
 sdesc: "Embedded GL native platform interface library (runtime)"
 ldesc: "Mesa is an open-source implementation of the OpenGL specification,

@@ -4,30 +4,34 @@ SRC_URI="ftp://ftp.freedesktop.org/pub/mesa/${PV}/MesaLib-${PV}.tar.bz2"
 SRC_DIR="Mesa-${PV}"
 
 PATCH_URI="
-	mirror://gentoo/${P}-gentoo-patches-01.tar.bz2
-	7.11.2-cygwin-M_PI.patch
-	7.11.2-cygwin-dri.patch
-	7.11.2-cygwin-soname.patch
-	7.11.2-shared-glapi.patch
+	8.0.2-cygwin-M_PI.patch
+	8.0.2-cygwin-dri.patch
+	8.0.2-cygwin-soname.patch
+	8.0.2-shared-glapi.patch
 	7.8.2-GL_DEPTH_STENCIL_NV.patch
-	7.10.1-glean-quick.patch
 	7.11.2-visibility.patch
 "
 
+DEPEND="pkgconfig(glproto)
+	pkgconfig(x11)
+	pkgconfig(x11-xcb)
+	pkgconfig(xcb-glx)
+	pkgconfig(xext)
+	libexpat1-devel
+	libllvm-devel"
+
 PKG_NAMES="mesa dri-drivers libglapi0 libglapi-devel libGL1 libGL-devel
-           libGLU1 libGLU-devel libGLw1 libGLw-devel libEGL1 libEGL-devel
-           libOpenVG1 libOpenVG-devel libOSMesa7 libOSMesa-devel"
+           libGLU1 libGLU-devel libEGL1 libEGL-devel
+           libOpenVG1 libOpenVG-devel libOSMesa8 libOSMesa-devel"
 #           libGLESv1_CM1 libGLESv1_CM-devel libGLESv2_2 libGLESv2-devel
 mesa_CONTENTS="usr/share/doc/"
 libglapi0_CONTENTS="usr/bin/cygglapi-0.dll"
 libglapi_devel_CONTENTS="usr/lib/libglapi.*"
 libGL1_CONTENTS="usr/bin/cygGL-1.dll"
-libGL_devel_CONTENTS="--exclude=glu* --exclude=GLw* --exclude=osmesa*
+libGL_devel_CONTENTS="--exclude=glu* --exclude=osmesa*
                       usr/include/GL/*.h usr/lib/libGL.* usr/lib/pkgconfig/gl.pc"
 libGLU1_CONTENTS="usr/bin/cygGLU-1.dll"
 libGLU_devel_CONTENTS="usr/include/GL/glu*.h usr/lib/libGLU.* usr/lib/pkgconfig/glu.pc"
-libGLw1_CONTENTS="usr/bin/cygGLw-1.dll"
-libGLw_devel_CONTENTS="usr/include/GL/GLw*.h usr/lib/libGLw.* usr/lib/pkgconfig/glw.pc"
 libEGL1_CONTENTS="usr/bin/cygEGL-1.dll usr/lib/egl/"
 libEGL_devel_CONTENTS="usr/include/EGL/ usr/include/KHR/ usr/lib/libEGL.* usr/lib/pkgconfig/egl.pc"
 libGLESv1_CM1_CONTENTS="usr/bin/cygGLESv1_CM-1.dll"
@@ -36,7 +40,7 @@ libGLESv2_2_CONTENTS="usr/bin/cygGLESv2-2.dll"
 libGLESv2_devel_CONTENTS="usr/include/GLES2/ usr/lib/libGLESv2.* usr/lib/pkgconfig/glesv2.pc"
 libOpenVG1_CONTENTS="usr/bin/cygOpenVG-1.dll"
 libOpenVG_devel_CONTENTS="usr/include/VG/ usr/lib/libOpenVG.* usr/lib/pkgconfig/vg.pc"
-libOSMesa7_CONTENTS="usr/bin/cygOSMesa-7.dll"
+libOSMesa8_CONTENTS="usr/bin/cygOSMesa-8.dll"
 libOSMesa_devel_CONTENTS="usr/include/GL/osmesa.h usr/lib/libOSMesa.* usr/lib/pkgconfig/osmesa.pc"
 dri_drivers_CONTENTS="usr/include/GL/internal/ usr/lib/dri/ usr/lib/pkgconfig/dri.pc"
 
@@ -50,16 +54,14 @@ src_compile() {
 	cygconf \
 		--enable-shared --disable-static \
 		--enable-shared-glapi \
+		--enable-dri \
 		--enable-egl \
 		--enable-gallium-egl \
-		--enable-gl-osmesa \
 		--disable-gles1 \
 		--disable-gles2 \
 		--enable-openvg \
-		--disable-glut \
-		--enable-motif \
-		--enable-xcb \
-		--with-driver=dri \
+		--enable-osmesa \
+		--disable-xlib-glx \
 		--with-dri-drivers=swrast \
 		--with-gallium-drivers=swrast
 

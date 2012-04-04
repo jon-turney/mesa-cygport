@@ -10,17 +10,28 @@
  
  ### Include directories
  SHARED_INCLUDES = \
---- origsrc/Mesa-7.11.2/src/mapi/glapi/gen-es/Makefile	2011-10-14 19:43:58.000000000 -0500
-+++ src/Mesa-7.11.2/src/mapi/glapi/gen-es/Makefile	2012-02-05 00:54:14.549972500 -0600
-@@ -55,7 +55,7 @@ endef
- %/glapi_mapi_tmp.h: $(MAPI)/mapi_abi.py $(COMMON)
- 	@mkdir -p $(dir $@)
- 	$(PYTHON2) $(PYTHON_FLAGS) $< \
--		--printer $(PRINTER) --mode lib $(GLAPI)/gl_and_es_API.xml > $@
-+		--printer $(PRINTER) --mode lib $(GLAPI)/gl_API.xml > $@
+--- origsrc/Mesa-8.0.2/src/mapi/glapi/gen/Makefile	2012-03-21 10:54:27.000000000 -0500
++++ src/Mesa-8.0.2/src/mapi/glapi/gen/Makefile	2012-04-03 20:45:30.492467000 -0500
+@@ -150,7 +150,7 @@ $(XORG_GLAPI_DIR)/%.h: $(MESA_GLAPI_DIR)
  
- %/main/dispatch.h: $(GLAPI)/gl_table.py $(COMMON)
- 	$(call gen-glapi,-c -m remap_table)
+ $(MESA_GLAPI_DIR)/glapi_mapi_tmp.h: $(MESA_MAPI_DIR)/mapi_abi.py $(COMMON_ES)
+ 	$(PYTHON2) $(PYTHON_FLAGS) $< \
+-		--printer glapi --mode lib gl_and_es_API.xml > $@
++		--printer glapi --mode lib gl_API.xml > $@
+ 
+ $(MESA_GLAPI_DIR)/glprocs.h: gl_procs.py $(COMMON)
+ 	$(PYTHON2) $(PYTHON_FLAGS) $< > $@
+--- origsrc/Mesa-8.0.2/src/mapi/shared-glapi/Makefile	2012-03-21 10:54:27.000000000 -0500
++++ src/Mesa-8.0.2/src/mapi/shared-glapi/Makefile	2012-04-03 21:31:25.291032400 -0500
+@@ -35,7 +35,7 @@ $(glapi_OBJECTS): %.o: $(MAPI)/%.c
+ $(glapi_SOURCES): glapi_mapi_tmp.h
+ 
+ include $(GLAPI)/gen/glapi_gen.mk
+-glapi_mapi_tmp.h: $(GLAPI)/gen/gl_and_es_API.xml $(glapi_gen_mapi_deps)
++glapi_mapi_tmp.h: $(GLAPI)/gen/gl_API.xml $(glapi_gen_mapi_deps)
+ 	$(call glapi_gen_mapi,$<,shared-glapi)
+ 
+ .PHONY: clean
 --- origsrc/Mesa-7.11.2/src/mesa/drivers/dri/Makefile.defines	2011-10-14 19:43:58.000000000 -0500
 +++ src/Mesa-7.11.2/src/mesa/drivers/dri/Makefile.defines	2011-12-23 05:38:08.353710600 -0600
 @@ -32,3 +32,7 @@ SHARED_INCLUDES = \
