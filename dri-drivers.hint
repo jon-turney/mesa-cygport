@@ -1,5 +1,5 @@
 category: X11
-requires: libexpat1 libgcc1 libglapi0 libllvm3.0 libstdc++6
+requires: libexpat1 libgcc1 libglapi0 libllvm3.1 libstdc++6
 external-source: mesa
 sdesc: "OpenGL DRI drivers"
 ldesc: "Mesa is an open-source implementation of the OpenGL specification,

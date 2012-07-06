@@ -4,11 +4,11 @@ SRC_URI="ftp://ftp.freedesktop.org/pub/mesa/${PV}/MesaLib-${PV}.tar.bz2"
 SRC_DIR="Mesa-${PV}"
 
 PATCH_URI="
+	http://www.linuxfromscratch.org/patches/blfs/svn/MesaLib-8.0.3-llvm-3.1-fixes-1.patch
 	8.0.2-cygwin-M_PI.patch
 	8.0.2-cygwin-dri.patch
 	8.0.2-cygwin-soname.patch
 	8.0.2-shared-glapi.patch
-	7.8.2-GL_DEPTH_STENCIL_NV.patch
 	7.11.2-visibility.patch
 "
 
