@@ -1,0 +1,132 @@
+--- origsrc/Mesa-8.0.3/configure.ac	2012-07-08 18:01:40.364739000 -0500
++++ src/Mesa-8.0.3/configure.ac	2012-07-08 21:14:05.772440000 -0500
+@@ -472,7 +472,7 @@ if test "x$enable_asm" = xyes; then
+     case "$host_cpu" in
+     i?86)
+         case "$host_os" in
+-        linux* | *freebsd* | dragonfly* | *netbsd*)
++        linux* | *freebsd* | dragonfly* | *netbsd* | cygwin*)
+             test "x$enable_64bit" = xyes && asm_arch=x86_64 || asm_arch=x86
+             ;;
+         esac
+@@ -1234,6 +1234,7 @@ if test "x$enable_dri" = xyes; then
+         ;;
+     cygwin*)
+         DEFINES="$DEFINES -DUSE_EXTERNAL_DXTN_LIB=1 -DIN_DRI_DRIVER"
++        DEFINES="$DEFINES -DHAVE_ALIAS"
+         if test "x$DRI_DIRS" = "xyes"; then
+             DRI_DIRS="swrast"
+         fi
+--- origsrc/Mesa-8.0.3/src/glx/indirect_size.c	2012-03-22 12:10:07.000000000 -0500
++++ src/Mesa-8.0.3/src/glx/indirect_size.c	2012-07-08 21:13:28.794343100 -0500
+@@ -43,7 +43,7 @@
+ #endif
+ 
+ 
+-#if defined(__CYGWIN__) || defined(__MINGW32__) || defined(GLX_USE_APPLEGL)
++#if defined(__MINGW32__) || defined(GLX_USE_APPLEGL)
+ #undef HAVE_ALIAS
+ #endif
+ #ifdef HAVE_ALIAS
+--- origsrc/Mesa-8.0.3/src/mapi/glapi/glapi_x86.S	2012-03-22 12:10:07.000000000 -0500
++++ src/Mesa-8.0.3/src/mapi/glapi/glapi_x86.S	2012-07-08 19:33:56.223072100 -0500
+@@ -45,7 +45,7 @@
+ 
+ #define GL_OFFSET(x) CODEPTR(REGOFF(4 * x, EAX))
+ 
+-#if defined(GNU_ASSEMBLER) && !defined(__DJGPP__) && !defined(__MINGW32__) && !defined(__APPLE__)
++#if defined(GNU_ASSEMBLER) && !defined(__DJGPP__) && !defined(__MINGW32__) && !defined(__APPLE__) && !defined(__CYGWIN__)
+ #define GLOBL_FN(x) GLOBL x ; .type x, @function
+ #else
+ #define GLOBL_FN(x) GLOBL x
+--- origsrc/Mesa-8.0.3/src/mapi/mapi/entry_x86_tsd.h	2012-03-22 12:10:07.000000000 -0500
++++ src/Mesa-8.0.3/src/mapi/mapi/entry_x86_tsd.h	2012-07-08 19:07:10.112129100 -0500
+@@ -32,8 +32,25 @@
+ 
+ __asm__(".text\n"
+         ".balign 32\n"
+-        "x86_entry_start:");
++        "_x86_entry_start:");
+ 
++#if defined(__CYGWIN__)
++#define STUB_ASM_HIDDEN(func)
++#define STUB_ASM_ENTRY(func)        \
++   ".globl _" func "\n"             \
++   ".balign 32\n"                   \
++   "_" func ":"
++#define STUB_ASM_CODE(slot)         \
++   "movl _" ENTRY_CURRENT_TABLE ", %eax\n\t" \
++   "testl %eax, %eax\n\t"           \
++   "je 1f\n\t"                      \
++   "jmp *(4 * " slot ")(%eax)\n"    \
++   "1:\n\t"                         \
++   "call _" ENTRY_CURRENT_TABLE_GET "\n\t" \
++   "jmp *(4 * " slot ")(%eax)"
++#else
++#define STUB_ASM_HIDDEN(func)        \
++   ".hidden " func
+ #define STUB_ASM_ENTRY(func)        \
+    ".globl " func "\n"              \
+    ".type " func ", @function\n"    \
+@@ -48,6 +65,7 @@ __asm__(".text\n"
+    "1:\n\t"                         \
+    "call " ENTRY_CURRENT_TABLE_GET "\n\t" \
+    "jmp *(4 * " slot ")(%eax)"
++#endif
+ 
+ #define MAPI_TMP_STUB_ASM_GCC
+ #include "mapi_tmp.h"
+@@ -55,7 +73,7 @@ __asm__(".text\n"
+ #ifndef MAPI_MODE_BRIDGE
+ 
+ __asm__(".balign 32\n"
+-        "x86_entry_end:");
++        "_x86_entry_end:");
+ 
+ #include <string.h>
+ #include "u_execmem.h"
+--- origsrc/Mesa-8.0.3/src/mapi/mapi/mapi_abi.py	2012-03-22 12:10:07.000000000 -0500
++++ src/Mesa-8.0.3/src/mapi/mapi/mapi_abi.py	2012-07-08 18:45:00.065645000 -0500
+@@ -553,7 +553,7 @@ class ABIPrinter(object):
+                 asm.append('#if 0')
+ 
+             if ent.hidden:
+-                asm.append('".hidden "%s"\\n"' % (name))
++                asm.append('STUB_ASM_HIDDEN(%s)"\\n"' % (name))
+ 
+             if ent.alias and not (ent.alias.hidden and no_hidden):
+                 asm.append('".globl "%s"\\n"' % (name))
+--- origsrc/Mesa-8.0.3/src/mesa/x86/assyntax.h	2011-12-07 17:54:22.000000000 -0600
++++ src/Mesa-8.0.3/src/mesa/x86/assyntax.h	2012-07-08 18:28:53.095210600 -0500
+@@ -255,7 +255,7 @@
+ #endif /* ACK_ASSEMBLER */
+ 
+ 
+-#if defined(__QNX__) || defined(Lynx) || (defined(SYSV) || defined(SVR4)) && !defined(ACK_ASSEMBLER) || defined(__ELF__) || defined(__GNU__) || defined(__GNUC__) && !defined(__DJGPP__) && !defined(__MINGW32__)
++#if defined(__QNX__) || defined(Lynx) || (defined(SYSV) || defined(SVR4)) && !defined(ACK_ASSEMBLER) || defined(__ELF__) || defined(__GNU__) || defined(__GNUC__) && !defined(__DJGPP__) && !defined(__MINGW32__) && !defined(__CYGWIN__)
+ #define GLNAME(a)	a
+ #else
+ #define GLNAME(a)	CONCAT(_,a)
+@@ -1735,9 +1735,9 @@ SECTION _DATA public align=16 class=DATA
+  * If we build with gcc's -fvisibility=hidden flag, we'll need to change
+  * the symbol visibility mode to 'default'.
+  */
+-#if defined(GNU_ASSEMBLER) && !defined(__DJGPP__) && !defined(__MINGW32__) && !defined(__APPLE__)
++#if defined(GNU_ASSEMBLER) && !defined(__DJGPP__) && !defined(__MINGW32__) && !defined(__APPLE__) && !defined(__CYGWIN__)
+ #  define HIDDEN(x) .hidden x
+-#elif defined(__GNUC__) && !defined(__DJGPP__) && !defined(__MINGW32__) && !defined(__APPLE__)
++#elif defined(__GNUC__) && !defined(__DJGPP__) && !defined(__MINGW32__) && !defined(__APPLE__) && !defined(__CYGWIN__)
+ #  pragma GCC visibility push(default)
+ #  define HIDDEN(x) .hidden x
+ #else
+--- origsrc/Mesa-8.0.3/src/mesa/x86/read_rgba_span_x86.S	2011-12-07 17:54:22.000000000 -0600
++++ src/Mesa-8.0.3/src/mesa/x86/read_rgba_span_x86.S	2012-07-08 19:10:56.824941100 -0500
+@@ -31,7 +31,7 @@
+  */
+ 
+ 	.file	"read_rgba_span_x86.S"
+-#if !defined(__DJGPP__) && !defined(__MINGW32__) && !defined(__APPLE__) /* this one cries for assyntax.h */
++#if !defined(__DJGPP__) && !defined(__MINGW32__) && !defined(__APPLE__) && !defined(__CYGWIN__) /* this one cries for assyntax.h */
+ /* Kevin F. Quinn 2nd July 2006
+  * Replaced data segment constants with text-segment instructions.
+  */

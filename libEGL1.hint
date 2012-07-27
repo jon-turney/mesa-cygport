@@ -1,8 +1,0 @@
-category: X11
-requires: libgcc1 libGL1 libglapi0 libllvm3.1 libOpenVG1 libstdc++6 libX11_6 libXext6
-external-source: mesa
-sdesc: "Embedded GL native platform interface library (runtime)"
-ldesc: "Mesa is an open-source implementation of the OpenGL specification,
-a system for rendering interactive 3D graphics. A variety of device drivers
-allows Mesa to be used in many different environments ranging from software
-emulation to complete hardware acceleration for modern GPUs."

@@ -1,8 +1,0 @@
-category: X11
-requires: libGLESv2_2 libEGL-devel
-external-source: mesa
-sdesc: "OpenGL ES 2.0 library (development)"
-ldesc: "Mesa is an open-source implementation of the OpenGL specification,
-a system for rendering interactive 3D graphics. A variety of device drivers
-allows Mesa to be used in many different environments ranging from software
-emulation to complete hardware acceleration for modern GPUs."

@@ -12,6 +12,17 @@
        if (!handle)
           goto fail;
  
+--- origsrc/Mesa-8.0.3/src/gallium/auxiliary/util/u_format_s3tc.c	2012-03-22 12:10:07.000000000 -0500
++++ src/Mesa-8.0.3/src/gallium/auxiliary/util/u_format_s3tc.c	2012-07-08 22:16:10.827945900 -0500
+@@ -30,6 +30,8 @@
+ 
+ #if defined(_WIN32) || defined(WIN32)
+ #define DXTN_LIBNAME "dxtn.dll"
++#elif defined(__CYGWIN__)
++#define DXTN_LIBNAME "cygtxc_dxtn.dll"
+ #elif defined(__APPLE__)
+ #define DXTN_LIBNAME "libtxc_dxtn.dylib"
+ #else
 --- origsrc/Mesa-7.11.2/src/glx/dri_common.c	2011-12-23 02:05:00.515288100 -0600
 +++ src/Mesa-7.11.2/src/glx/dri_common.c	2011-12-23 00:39:51.000000000 -0600
 @@ -104,8 +104,14 @@ driOpenDriver(const char *driverName)
