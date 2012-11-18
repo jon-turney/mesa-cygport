@@ -1,3 +1,6 @@
+NAME="mesa"
+VERSION=8.0.5
+RELEASE=1
 CATEGORY="X11"
 SUMMARY="X11 OpenGL implementation"
 DESCRIPTION="Mesa is an open-source implementation of the OpenGL specification,
@@ -11,7 +14,7 @@ SRC_DIR="Mesa-${PV}"
 PATCH_URI="
 	fedora/mesa-8.0-llvmpipe-shmget.patch
 	fedora/mesa-8.0.1-fix-16bpp.patch
-	http://www.linuxfromscratch.org/patches/blfs/svn/MesaLib-${PV}-llvm-3.1-fixes-1.patch
+	http://www.linuxfromscratch.org/patches/downloads/MesaLib/MesaLib-8.0.4-llvm-3.1-fixes-1.patch
 	8.0.2-cygwin-M_PI.patch
 	8.0.2-cygwin-dri.patch
 	8.0.2-cygwin-soname.patch
@@ -28,8 +31,7 @@ DEPEND="pkgconfig(glproto)
 	libllvm-devel"
 
 PKG_NAMES="mesa dri-drivers libglapi0 libglapi-devel libGL1 libGL-devel
-           libGLU1 libGLU-devel libEGL1 libEGL-devel
-           libOpenVG1 libOpenVG-devel libOSMesa8 libOSMesa-devel"
+	libEGL1 libEGL-devel libOpenVG1 libOpenVG-devel libOSMesa8 libOSMesa-devel"
 #           libGLESv1_CM1 libGLESv1_CM-devel libGLESv2_2 libGLESv2-devel
 mesa_CONTENTS="usr/share/doc/"
 libglapi0_SUMMARY="OpenGL internal API library (runtime)"
@@ -41,10 +43,6 @@ libGL1_CONTENTS="usr/bin/cygGL-1.dll"
 libGL_devel_SUMMARY="X11 OpenGL library (development)"
 libGL_devel_CONTENTS="--exclude=glu* --exclude=osmesa*
                       usr/include/GL/*.h usr/lib/libGL.* usr/lib/pkgconfig/gl.pc"
-libGLU1_SUMMARY="X11 OpenGL Utility library (runtime)"
-libGLU1_CONTENTS="usr/bin/cygGLU-1.dll"
-libGLU_devel_SUMMARY="X11 OpenGL Utility library (development)"
-libGLU_devel_CONTENTS="usr/include/GL/glu*.h usr/lib/libGLU.* usr/lib/pkgconfig/glu.pc"
 libEGL1_SUMMARY="Embedded GL native platform interface library (runtime)"
 libEGL1_REQUIRES="libGL1" # dlopen()ed for egl_glx
 libEGL1_CONTENTS="usr/bin/cygEGL-1.dll usr/lib/egl/"
@@ -70,6 +68,7 @@ libOSMesa_devel_REQUIRES="libGL-devel"
 libOSMesa_devel_CONTENTS="usr/include/GL/osmesa.h usr/lib/libOSMesa.* usr/lib/pkgconfig/osmesa.pc"
 dri_drivers_SUMMARY="OpenGL DRI drivers"
 dri_drivers_CONTENTS="usr/include/GL/internal/ usr/lib/dri/ usr/lib/pkgconfig/dri.pc"
+PKG_IGNORE="usr/include/GL/glu*"
 
 DIFF_EXCLUDES="docs"
 
@@ -87,6 +86,7 @@ src_compile() {
 		--enable-gallium-llvm \
 		--disable-gles1 \
 		--disable-gles2 \
+		--disable-glu \
 		--enable-glx \
 		--enable-openvg \
 		--enable-osmesa \
