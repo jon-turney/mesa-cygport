@@ -1,6 +1,6 @@
 NAME="mesa"
 VERSION=8.0.5
-RELEASE=1
+RELEASE=2
 CATEGORY="X11"
 SUMMARY="X11 OpenGL implementation"
 DESCRIPTION="Mesa is an open-source implementation of the OpenGL specification,
@@ -20,6 +20,7 @@ PATCH_URI="
 	8.0.2-cygwin-soname.patch
 	8.0.2-shared-glapi.patch
 	7.11.2-visibility.patch
+	8.0.5-glXCreateWindow-always-fails.patch
 "
 
 DEPEND="pkgconfig(glproto)
