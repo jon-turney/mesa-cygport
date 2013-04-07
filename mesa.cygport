@@ -28,8 +28,12 @@ DEPEND="pkgconfig(glproto)
 	pkgconfig(x11-xcb)
 	pkgconfig(xcb-glx)
 	pkgconfig(xext)
+	pkgconfig(xfixes)
+	pkgconfig(xdamage)
 	libexpat1-devel
-	libllvm-devel"
+	libllvm-devel
+	makedepend
+"
 
 PKG_NAMES="mesa dri-drivers libglapi0 libglapi-devel libGL1 libGL-devel
 	libEGL1 libEGL-devel libOpenVG1 libOpenVG-devel libOSMesa8 libOSMesa-devel"
@@ -84,7 +88,7 @@ src_compile() {
 		--enable-dri \
 		--enable-egl \
 		--enable-gallium-egl \
-		--enable-gallium-llvm \
+		${ARCH_i686+--enable-gallium-llvm} \
 		--disable-gles1 \
 		--disable-gles2 \
 		--disable-glu \
