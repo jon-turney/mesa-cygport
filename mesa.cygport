@@ -88,7 +88,7 @@ src_compile() {
 		--enable-dri \
 		--enable-egl \
 		--enable-gallium-egl \
-		${ARCH_i686+--enable-gallium-llvm} \
+		--${ARCH_i686+enable}${ARCH_x86_64+disable}-gallium-llvm \
 		--disable-gles1 \
 		--disable-gles2 \
 		--disable-glu \
@@ -99,6 +99,28 @@ src_compile() {
 		--with-dri-drivers=swrast \
 		--with-gallium-drivers=swrast
 
+	if cross_compiling
+	then
+		pushd src/glsl
+
+		# let us alter the Makefile without showing up in the patch
+		rm -f Makefile
+		cp ${S}/src/glsl/Makefile .
+
+		# builtin_compiler is a (noinst) build executable
+		cygmake builtin_function.cpp CC=gcc CXX=g++
+
+		# protect the generated file, but clean up the rest to
+		# rebuilt by the cross-compiler
+		mv builtin_function.cpp{,.bak}
+		cygmake clean
+		mv builtin_function.cpp{.bak,}
+
+		# now make sure this doesn't get rebuilt by host exe
+		sed -i -e '/^builtin_function\.cpp:/,/^\t$(PYTHON2)/d' Makefile
+
+		popd
+	fi
 	cygmake
 }
 
