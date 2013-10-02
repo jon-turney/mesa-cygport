@@ -1,15 +1,15 @@
 NAME="mesa"
 VERSION=8.0.5
-RELEASE=2
-CATEGORY="X11"
+RELEASE=3
+CATEGORY="Libs"
 SUMMARY="X11 OpenGL implementation"
 DESCRIPTION="Mesa is an open-source implementation of the OpenGL specification,
 a system for rendering interactive 3D graphics. A variety of device drivers
 allows Mesa to be used in many different environments ranging from software
 emulation to complete hardware acceleration for modern GPUs."
 HOMEPAGE="http://www.mesa3d.org/"
-SRC_URI="ftp://ftp.freedesktop.org/pub/mesa/${PV}/MesaLib-${PV}.tar.bz2"
-SRC_DIR="Mesa-${PV}"
+SRC_URI="ftp://ftp.freedesktop.org/pub/mesa/${VERSION}/MesaLib-${VERSION}.tar.bz2"
+SRC_DIR="Mesa-${VERSION}"
 
 PATCH_URI="
 	fedora/mesa-8.0-llvmpipe-shmget.patch
@@ -21,6 +21,8 @@ PATCH_URI="
 	8.0.2-shared-glapi.patch
 	7.11.2-visibility.patch
 	8.0.5-glXCreateWindow-always-fails.patch
+	8.0.5-enable-strdup-prototype.patch
+	8.0.5-cygwin-nx-heap.patch
 "
 
 DEPEND="pkgconfig(glproto)

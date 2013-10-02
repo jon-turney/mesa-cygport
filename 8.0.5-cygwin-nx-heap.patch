@@ -1,0 +1,13 @@
+64-bit Cygwin heap is NX, so we must allocate the memory to be used in the unix way...
+
+--- origsrc/Mesa-8.0.5/src/gallium/auxiliary/rtasm/rtasm_execmem.c	2011-11-08 18:09:41.000000000 +0000
++++ src/Mesa-8.0.5/src/gallium/auxiliary/rtasm/rtasm_execmem.c	2013-09-21 14:27:55.777400000 +0100
+@@ -48,7 +48,7 @@
+ #include <windows.h>
+ #endif
+ 
+-#if defined(PIPE_OS_LINUX) || defined(PIPE_OS_BSD) || defined(PIPE_OS_SOLARIS)
++#if defined(PIPE_OS_LINUX) || defined(PIPE_OS_BSD) || defined(PIPE_OS_SOLARIS) || defined(PIPE_OS_CYGWIN)
+ 
+ 
+ /*
