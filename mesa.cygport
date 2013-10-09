@@ -1,6 +1,6 @@
 NAME="mesa"
 VERSION=8.0.5
-RELEASE=4
+RELEASE=5
 CATEGORY="Libs"
 SUMMARY="X11 OpenGL implementation"
 DESCRIPTION="Mesa is an open-source implementation of the OpenGL specification,
@@ -25,6 +25,7 @@ PATCH_URI="
 	8.0.5-cygwin-nx-heap.patch
 	8.0.5-cygwin-x86_64-msabi.patch
 	8.0.5-x86_64-msabi-fix.patch
+	8.0.5-Werror-implicit.patch
 "
 
 DEPEND="pkgconfig(glproto)
