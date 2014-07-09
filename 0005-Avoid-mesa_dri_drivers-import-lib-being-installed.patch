@@ -1,0 +1,28 @@
+From acd0662541b1ad1a47eab49192bdc53be181960f Mon Sep 17 00:00:00 2001
+From: Jon TURNEY <jon.turney@dronecode.org.uk>
+Date: Fri, 4 Jul 2014 00:39:47 +0100
+Subject: [PATCH 5/8] Avoid mesa_dri_drivers import lib being installed
+
+Avoid mesa_dri_drivers.dll.a import lib being installed
+
+Signed-off-by: Jon TURNEY <jon.turney@dronecode.org.uk>
+---
+ src/mesa/drivers/dri/Makefile.am | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/mesa/drivers/dri/Makefile.am b/src/mesa/drivers/dri/Makefile.am
+index f491937..db02a5e 100644
+--- a/src/mesa/drivers/dri/Makefile.am
++++ b/src/mesa/drivers/dri/Makefile.am
+@@ -91,7 +91,7 @@ install-data-hook:
+ 		ln -f $(DESTDIR)$(dridir)/mesa_dri_drivers.so \
+ 		      $(DESTDIR)$(dridir)/$$i; \
+ 	done;
+-	$(RM) -f $(DESTDIR)$(dridir)/mesa_dri_drivers.so
++	$(RM) -f $(DESTDIR)$(dridir)/mesa_dri_drivers.*
+ 	$(RM) -f $(DESTDIR)$(dridir)/mesa_dri_drivers.la
+ 
+ endif
+-- 
+1.8.5.5
+

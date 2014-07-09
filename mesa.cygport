@@ -1,6 +1,6 @@
 NAME="mesa"
-VERSION=8.0.5
-RELEASE=5
+VERSION=10.2.3
+RELEASE=1
 CATEGORY="Libs"
 SUMMARY="X11 OpenGL implementation"
 DESCRIPTION="Mesa is an open-source implementation of the OpenGL specification,
@@ -11,21 +11,22 @@ HOMEPAGE="http://www.mesa3d.org/"
 SRC_URI="ftp://ftp.freedesktop.org/pub/mesa/${VERSION}/MesaLib-${VERSION}.tar.bz2"
 SRC_DIR="Mesa-${VERSION}"
 
+#	fedora/mesa-8.0-llvmpipe-shmget.patch
+#	fedora/mesa-8.0.1-fix-16bpp.patch
+
 PATCH_URI="
-	fedora/mesa-8.0-llvmpipe-shmget.patch
-	fedora/mesa-8.0.1-fix-16bpp.patch
-	http://www.linuxfromscratch.org/patches/downloads/MesaLib/MesaLib-8.0.4-llvm-3.1-fixes-1.patch
+	0001-Make-DRI-dependencies-and-build-depend-on-the-target.patch
+	0002-targets-dri-swrast-explicitly-link-against-glapi-use.patch
+	0003-megadriver-explicitly-link-against-glapi-link-with-n.patch
+	0004-Remove-checks-for-shared-LLVM-which-assume-.so-is-li.patch
+	0005-Avoid-mesa_dri_drivers-import-lib-being-installed.patch
+	0006-Fixes-for-building-with-enable-egl-enable-gallium-eg.patch
+	0007-osmesa-is-not-a-module.patch
+	0008-Use-.so-extension-for-egl_gallium.patch
 	8.0.2-cygwin-M_PI.patch
-	8.0.2-cygwin-dri.patch
+	cygwin-xmlconfig-invocation-name.patch
 	8.0.2-cygwin-soname.patch
-	8.0.2-shared-glapi.patch
-	7.11.2-visibility.patch
-	8.0.5-glXCreateWindow-always-fails.patch
 	8.0.5-enable-strdup-prototype.patch
-	8.0.5-cygwin-nx-heap.patch
-	8.0.5-cygwin-x86_64-msabi.patch
-	8.0.5-x86_64-msabi-fix.patch
-	8.0.5-Werror-implicit.patch
 "
 
 DEPEND="pkgconfig(glproto)
@@ -35,9 +36,8 @@ DEPEND="pkgconfig(glproto)
 	pkgconfig(xext)
 	pkgconfig(xfixes)
 	pkgconfig(xdamage)
-	libexpat1-devel
+	libexpat-devel
 	libllvm-devel
-	makedepend
 "
 
 PKG_NAMES="mesa dri-drivers libglapi0 libglapi-devel libGL1 libGL-devel
@@ -51,7 +51,7 @@ libglapi_devel_CONTENTS="usr/lib/libglapi.*"
 libGL1_SUMMARY="X11 OpenGL library (runtime)"
 libGL1_CONTENTS="usr/bin/cygGL-1.dll"
 libGL_devel_SUMMARY="X11 OpenGL library (development)"
-libGL_devel_CONTENTS="--exclude=glu* --exclude=osmesa*
+libGL_devel_CONTENTS="--exclude=osmesa*
                       usr/include/GL/*.h usr/lib/libGL.* usr/lib/pkgconfig/gl.pc"
 libEGL1_SUMMARY="Embedded GL native platform interface library (runtime)"
 libEGL1_REQUIRES="libGL1" # dlopen()ed for egl_glx
@@ -77,26 +77,23 @@ libOSMesa_devel_SUMMARY="Mesa Off-Screen rendering library (development)"
 libOSMesa_devel_REQUIRES="libGL-devel"
 libOSMesa_devel_CONTENTS="usr/include/GL/osmesa.h usr/lib/libOSMesa.* usr/lib/pkgconfig/osmesa.pc"
 dri_drivers_SUMMARY="OpenGL DRI drivers"
-dri_drivers_CONTENTS="usr/include/GL/internal/ usr/lib/dri/ usr/lib/pkgconfig/dri.pc"
-PKG_IGNORE="usr/include/GL/glu*"
+dri_drivers_CONTENTS="usr/include/GL/internal/ usr/lib/dri/ usr/lib/pkgconfig/dri.pc etc/drirc"
 
 DIFF_EXCLUDES="docs"
 
 src_compile() {
-	lndirs
 	cd ${S}
 	cygautoreconf
 	cd ${B}
 	cygconf \
 		--enable-shared --disable-static \
 		--enable-shared-glapi \
-		--enable-dri \
+		--enable-dri --disable-dri3 --disable-driglx-direct \
 		--enable-egl \
 		--enable-gallium-egl \
 		--${ARCH_i686+enable}${ARCH_x86_64+disable}-gallium-llvm \
 		--disable-gles1 \
 		--disable-gles2 \
-		--disable-glu \
 		--enable-glx \
 		--enable-openvg \
 		--enable-osmesa \
@@ -104,28 +101,6 @@ src_compile() {
 		--with-dri-drivers=swrast \
 		--with-gallium-drivers=swrast
 
-	if cross_compiling
-	then
-		pushd src/glsl
-
-		# let us alter the Makefile without showing up in the patch
-		rm -f Makefile
-		cp ${S}/src/glsl/Makefile .
-
-		# builtin_compiler is a (noinst) build executable
-		cygmake builtin_function.cpp CC=gcc CXX=g++
-
-		# protect the generated file, but clean up the rest to
-		# rebuilt by the cross-compiler
-		mv builtin_function.cpp{,.bak}
-		cygmake clean
-		mv builtin_function.cpp{.bak,}
-
-		# now make sure this doesn't get rebuilt by host exe
-		sed -i -e '/^builtin_function\.cpp:/,/^\t$(PYTHON2)/d' Makefile
-
-		popd
-	fi
 	cygmake
 }
 
@@ -134,18 +109,16 @@ src_install() {
 	dodir /usr/bin
 	cyginstall
 
-	pushd ${D}/usr/lib
-	for l in *.dll.a
-	do
-		mv $l ${l/-[0-9]}
-	done
-
 	cd ${S}/docs
-	dodoc COPYING README.CYGWIN
-
-	docinto api
-	dodoc MESA_*.spec
+	dodoc COPYING README.CYGWIN libGL.txt
 
 	docinto html
-	dodoc *.html
+	dodoc *.html *.css *.png specs specs/old relnotes
+}
+
+# can't use the default src_test, as 'make -n check' fails the first time as
+# there are no proper dependencies on src/gtest, so provide our own.
+src_test() {
+	cd ${B}
+	make check
 }
