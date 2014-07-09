@@ -14,14 +14,28 @@ Define _XOPEN_SOURCE=500 to permit headers to prototype strdup() with -std=99
 If we fail to do this, the implicit int return of strdup() being converted to a char * causes builtin_compiler to fail to
 function correctly on 64-bit cygwin...
 
---- origsrc/Mesa-8.0.5/configure.ac	2013-09-21 02:08:30.389200000 +0100
-+++ src/Mesa-8.0.5/configure.ac	2013-09-21 02:38:55.190200000 +0100
-@@ -215,7 +215,7 @@ solaris*)
-     DEFINES="$DEFINES -DPTHREADS -DSVR4"
+--- a/configure.ac
++++ b/configure.ac
+@@ -159,20 +159,13 @@ solaris*)
+     DEFINES="$DEFINES -DHAVE_PTHREAD -DSVR4"
      ;;
  cygwin*)
--    DEFINES="$DEFINES -D_GNU_SOURCE -DPTHREADS"
-+    DEFINES="$DEFINES -D_GNU_SOURCE -D_XOPEN_SOURCE=500 -DPTHREADS"
-     VISIBILITY_CFLAGS=""
-     VISIBILITY_CXXFLAGS=""
+-    DEFINES="$DEFINES -DHAVE_PTHREAD"
++    DEFINES="$DEFINES -D_XOPEN_SOURCE=500 -DHAVE_PTHREAD"
      ;;
+ esac
+
+ dnl Add flags for gcc and g++
+ if test "x$GCC" = xyes; then
+-    case "$host_os" in
+-    cygwin*)
+-        CFLAGS="$CFLAGS -Wall -std=gnu99"
+-        ;;
+-    *)
+-        CFLAGS="$CFLAGS -Wall -std=c99"
+-        ;;
+-    esac
++    CFLAGS="$CFLAGS -Wall -std=c99"
+
+     # Enable -Werror=implicit-function-declaration and
+     # -Werror=missing-prototypes, if available, or otherwise, just

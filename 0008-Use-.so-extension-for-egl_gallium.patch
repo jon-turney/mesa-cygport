@@ -1,0 +1,28 @@
+From dc08b6aab021030d5c56c6188cda2b75b645c839 Mon Sep 17 00:00:00 2001
+From: Jon TURNEY <jon.turney@dronecode.org.uk>
+Date: Fri, 4 Jul 2014 12:07:24 +0100
+Subject: [PATCH 8/8] Use .so extension for egl_gallium
+
+Give egl_gallium driver the .so extension, to match the previous package
+contents, and (presumably) what is hardcoded in the EGL loader.
+
+Signed-off-by: Jon TURNEY <jon.turney@dronecode.org.uk>
+---
+ src/gallium/targets/egl-static/Makefile.am | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/src/gallium/targets/egl-static/Makefile.am b/src/gallium/targets/egl-static/Makefile.am
+index e64de4d..318b345 100644
+--- a/src/gallium/targets/egl-static/Makefile.am
++++ b/src/gallium/targets/egl-static/Makefile.am
+@@ -45,6 +45,7 @@ AM_CPPFLAGS = \
+ 	-D_EGL_MAIN=_eglMain
+ 
+ AM_LDFLAGS = \
++	-shrext .so \
+ 	-module \
+ 	-no-undefined \
+ 	-avoid-version \
+-- 
+1.8.5.5
+

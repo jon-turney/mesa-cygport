@@ -1,0 +1,47 @@
+From 66903b7c20bf1516a94475677a239ec5cfaa1095 Mon Sep 17 00:00:00 2001
+From: Jon TURNEY <jon.turney@dronecode.org.uk>
+Date: Sat, 30 Nov 2013 16:39:51 +0000
+Subject: [PATCH 2/8] targets/dri-swrast: explicitly link against glapi, use
+ -no-undefined
+
+On cygwin we need to link against the static or shared glapi provider so
+it can be built with no unresolved references.
+
+"Use -no-undefined to assure libtool that the library has no unresolved symbols
+at link time, so that libtool will build a shared library on platforms that
+require that all symbols are resolved when the library is linked."
+
+Signed-off-by: Jon TURNEY <jon.turney@dronecode.org.uk>
+---
+ src/gallium/targets/dri-swrast/Makefile.am | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/src/gallium/targets/dri-swrast/Makefile.am b/src/gallium/targets/dri-swrast/Makefile.am
+index 4e2ecf2..6eeadfa 100644
+--- a/src/gallium/targets/dri-swrast/Makefile.am
++++ b/src/gallium/targets/dri-swrast/Makefile.am
+@@ -43,7 +43,7 @@ swrast_dri_la_SOURCES = \
+ 	$(top_srcdir)/src/mesa/drivers/dri/common/dri_util.c \
+ 	$(top_srcdir)/src/mesa/drivers/dri/common/xmlconfig.c
+ 
+-swrast_dri_la_LDFLAGS = $(GALLIUM_DRI_LINKER_FLAGS)
++swrast_dri_la_LDFLAGS = $(GALLIUM_DRI_LINKER_FLAGS) -no-undefined
+ 
+ swrast_dri_la_LIBADD = \
+ 	$(top_builddir)/src/gallium/state_trackers/dri/sw/libdrisw.la \
+@@ -53,6 +53,12 @@ swrast_dri_la_LIBADD = \
+ 	$(top_builddir)/src/gallium/drivers/rbug/librbug.la \
+ 	$(GALLIUM_DRI_LIB_DEPS)
+ 
++if HAVE_SHARED_GLAPI
++swrast_dri_la_LIBADD += $(top_builddir)/src/mapi/shared-glapi/libglapi.la
++else
++swrast_dri_la_LIBADD += $(top_builddir)/src/mapi/glapi/libglapi.la
++endif
++
+ if HAVE_MESA_LLVM
+ AM_CPPFLAGS += -DGALLIUM_LLVMPIPE
+ swrast_dri_la_LIBADD += $(top_builddir)/src/gallium/drivers/llvmpipe/libllvmpipe.la
+-- 
+1.8.5.5
+

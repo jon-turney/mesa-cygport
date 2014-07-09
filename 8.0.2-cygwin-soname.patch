@@ -1,17 +1,3 @@
---- origsrc/Mesa-8.0.1/src/egl/drivers/glx/egl_glx.c
-+++ src/Mesa-8.0.1/src/egl/drivers/glx/egl_glx.c
-@@ -1076,7 +1076,11 @@ GLX_Load(_EGLDriver *drv)
-    if (!GLX_drv->glXGetProcAddress)
-       GLX_drv->glXGetProcAddress = dlsym(RTLD_DEFAULT, "glXGetProcAddressARB");
-    if (!GLX_drv->glXGetProcAddress) {
-+#ifdef __CYGWIN__
-+      handle = dlopen("cygGL-1.dll", RTLD_LAZY | RTLD_LOCAL);
-+#else
-       handle = dlopen("libGL.so", RTLD_LAZY | RTLD_LOCAL);
-+#endif
-       if (!handle)
-          goto fail;
- 
 --- origsrc/Mesa-8.0.3/src/gallium/auxiliary/util/u_format_s3tc.c	2012-03-22 12:10:07.000000000 -0500
 +++ src/Mesa-8.0.3/src/gallium/auxiliary/util/u_format_s3tc.c	2012-07-08 22:16:10.827945900 -0500
 @@ -30,6 +30,8 @@

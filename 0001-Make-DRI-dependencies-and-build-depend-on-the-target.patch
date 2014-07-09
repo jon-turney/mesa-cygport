@@ -1,0 +1,402 @@
+From d637e8b06adfdeb556e60a1ff98f2723f618a1c7 Mon Sep 17 00:00:00 2001
+From: Jon TURNEY <jon.turney@dronecode.org.uk>
+Date: Mon, 12 May 2014 10:17:06 +0100
+Subject: [PATCH 1/8] Make DRI dependencies and build depend on the target
+
+- Don't require xcb-dri[23] etc. if we aren't building for a target with DRM, as
+we won't be using dri[23]
+
+- Enable a more fine-grained control of what DRI code is built, so that a libGL
+using direct swrast can be built on targets which don't have DRM.
+
+The HAVE_DRI automake conditional is retired in favour of a number of other
+conditionals:
+
+HAVE_DRI2 enables building of code using the DRI2 interface (and possibly DRI3
+with HAVE_DRI3)
+
+HAVE_DRISW enables building of DRI swrast
+
+HAVE_DRICOMMON enables building of target-independent DRI code, and also enables
+some makefile cases where a more detailled decision is made at a lower level.
+
+HAVE_APPLEDRI enables building of an Apple-specific direct rendering interface,
+still which requires additional fixing up to build properly.
+
+v2:
+Place xfont.c and drisw_glx.c into correct categories.
+Update 'make check' as well
+
+Signed-off-by: Jon TURNEY <jon.turney@dronecode.org.uk>
+Reviewed-by: Jeremy Huddleston Sequoia <jeremyhu@apple.com>
+Reviewed-by: Emil Velikov <emil.l.velikov@gmail.com>
+---
+ configure.ac                               | 56 +++++++++++++++++++++---------
+ src/gallium/state_trackers/Makefile.am     |  2 +-
+ src/gallium/state_trackers/dri/Makefile.am |  6 +++-
+ src/gallium/targets/Makefile.am            | 18 +++++-----
+ src/gallium/targets/gbm/Makefile.am        |  2 +-
+ src/gallium/targets/opencl/Makefile.am     |  2 +-
+ src/gallium/targets/xa/Makefile.am         |  2 +-
+ src/gallium/tests/trivial/Makefile.am      |  2 +-
+ src/gallium/winsys/Makefile.am             |  2 +-
+ src/gbm/Makefile.am                        |  2 +-
+ src/glx/Makefile.am                        | 28 +++++++++++----
+ src/glx/tests/Makefile.am                  |  6 +++-
+ src/mesa/Makefile.am                       |  2 +-
+ 13 files changed, 89 insertions(+), 41 deletions(-)
+
+diff --git a/configure.ac b/configure.ac
+index 2aaba61..40457fe 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -748,8 +748,22 @@ fi
+ 
+ AM_CONDITIONAL(HAVE_DRI_GLX, test "x$enable_glx" = xyes -a \
+                                   "x$enable_dri" = xyes)
+-AM_CONDITIONAL(HAVE_DRI, test "x$enable_dri" = xyes)
+-AM_CONDITIONAL(HAVE_DRI3, test "x$enable_dri3" = xyes)
++
++# Select which platform-dependent DRI code gets built
++case "$host_os" in
++darwin*)
++    dri_platform='apple' ;;
++gnu*|mingw*|cygwin*)
++    dri_platform='none' ;;
++*)
++    dri_platform='drm' ;;
++esac
++
++AM_CONDITIONAL(HAVE_DRICOMMON, test "x$enable_dri" = xyes )
++AM_CONDITIONAL(HAVE_DRISW, test "x$enable_dri" = xyes )
++AM_CONDITIONAL(HAVE_DRI2, test "x$enable_dri" = xyes && test "x$dri_platform" = xdrm )
++AM_CONDITIONAL(HAVE_DRI3, test "x$enable_dri3" = xyes && test "x$dri_platform" = xdrm )
++AM_CONDITIONAL(HAVE_APPLEDRI, test "x$enable_dri" = xyes && test "x$dri_platform" = xapple )
+ 
+ AC_ARG_ENABLE([shared-glapi],
+     [AS_HELP_STRING([--enable-shared-glapi],
+@@ -874,23 +888,31 @@ xyesyes)
+ xyesno)
+     # DRI-based GLX
+     PKG_CHECK_MODULES([GLPROTO], [glproto >= $GLPROTO_REQUIRED])
+-    if test x"$driglx_direct" = xyes; then
+-        if test "x$have_libdrm" != xyes; then
+-            AC_MSG_ERROR([Direct rendering requires libdrm >= $LIBDRM_REQUIRED])
+-        fi
+-        PKG_CHECK_MODULES([DRI2PROTO], [dri2proto >= $DRI2PROTO_REQUIRED])
+-        GL_PC_REQ_PRIV="$GL_PC_REQ_PRIV libdrm >= $LIBDRM_REQUIRED"
+-        if test x"$enable_dri3" = xyes; then
+-            PKG_CHECK_MODULES([DRI3PROTO], [dri3proto >= $DRI3PROTO_REQUIRED])
+-            PKG_CHECK_MODULES([PRESENTPROTO], [presentproto >= $PRESENTPROTO_REQUIRED])
+-        fi
+-    fi
+ 
+     # find the DRI deps for libGL
+-    dri_modules="x11 xext xdamage xfixes x11-xcb xcb-glx >= $XCBGLX_REQUIRED xcb-dri2 >= $XCBDRI2_REQUIRED"
++    dri_modules="x11 xext xdamage xfixes x11-xcb xcb-glx >= $XCBGLX_REQUIRED"
+ 
+-    if test x"$enable_dri3" = xyes; then
+-        dri_modules="$dri_modules xcb-dri3 xcb-present xcb-sync xshmfence >= $XSHMFENCE_REQUIRED"
++    if test x"$driglx_direct" = xyes; then
++        if test x"$dri_platform" = xdrm ; then
++            if test "x$have_libdrm" != xyes; then
++               AC_MSG_ERROR([Direct rendering requires libdrm >= $LIBDRM_REQUIRED])
++            fi
++
++            PKG_CHECK_MODULES([DRI2PROTO], [dri2proto >= $DRI2PROTO_REQUIRED])
++            GL_PC_REQ_PRIV="$GL_PC_REQ_PRIV libdrm >= $LIBDRM_REQUIRED"
++            if test x"$enable_dri3" = xyes; then
++               PKG_CHECK_MODULES([DRI3PROTO], [dri3proto >= $DRI3PROTO_REQUIRED])
++               PKG_CHECK_MODULES([PRESENTPROTO], [presentproto >= $PRESENTPROTO_REQUIRED])
++            fi
++
++            if test x"$enable_dri" = xyes; then
++               dri_modules="$dri_modules xcb-dri2 >= $XCBDRI2_REQUIRED"
++            fi
++
++            if test x"$enable_dri3" = xyes; then
++               dri_modules="$dri_modules xcb-dri3 xcb-present xcb-sync xshmfence >= $XSHMFENCE_REQUIRED"
++            fi
++        fi
+     fi
+ 
+     # add xf86vidmode if available
+@@ -2221,7 +2243,9 @@ xnono)
+         ;;
+ esac
+ 
++echo ""
+ if test "x$enable_dri" != xno; then
++        echo "        DRI platform:    $dri_platform"
+         if test -z "$DRI_DIRS"; then
+             echo "        DRI drivers:     no"
+         else
+diff --git a/src/gallium/state_trackers/Makefile.am b/src/gallium/state_trackers/Makefile.am
+index 2098560..3ced6ad 100644
+--- a/src/gallium/state_trackers/Makefile.am
++++ b/src/gallium/state_trackers/Makefile.am
+@@ -29,7 +29,7 @@ if HAVE_GALLIUM_OSMESA
+ SUBDIRS += osmesa
+ endif
+ 
+-if HAVE_DRI
++if HAVE_DRICOMMON
+ SUBDIRS += dri
+ endif
+ 
+diff --git a/src/gallium/state_trackers/dri/Makefile.am b/src/gallium/state_trackers/dri/Makefile.am
+index 9428b55..b89d02f 100644
+--- a/src/gallium/state_trackers/dri/Makefile.am
++++ b/src/gallium/state_trackers/dri/Makefile.am
+@@ -20,7 +20,11 @@
+ # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ # DEALINGS IN THE SOFTWARE.
+ 
+-SUBDIRS = sw
++SUBDIRS =
++
++if HAVE_DRISW
++SUBDIRS += sw
++endif
+ 
+ if HAVE_LIBDRM
+ SUBDIRS += drm
+diff --git a/src/gallium/targets/Makefile.am b/src/gallium/targets/Makefile.am
+index 5023dbc..36d359c 100644
+--- a/src/gallium/targets/Makefile.am
++++ b/src/gallium/targets/Makefile.am
+@@ -43,37 +43,37 @@ SUBDIRS += opencl
+ endif
+ 
+ if HAVE_GALLIUM_SVGA
+-if HAVE_DRI
++if HAVE_DRI2
+ SUBDIRS += dri-vmwgfx
+ endif
+ endif
+ 
+ if HAVE_GALLIUM_FREEDRENO
+-if HAVE_DRI
++if HAVE_DRI2
+ SUBDIRS += dri-freedreno
+ endif
+ endif
+ 
+ if HAVE_GALLIUM_I915
+-if HAVE_DRI
++if HAVE_DRI2
+ SUBDIRS += dri-i915
+ endif
+ endif
+ 
+ if HAVE_GALLIUM_ILO
+-if HAVE_DRI
++if HAVE_DRI2
+ SUBDIRS += dri-ilo
+ endif
+ endif
+ 
+ if HAVE_GALLIUM_R300
+-if HAVE_DRI
++if HAVE_DRI2
+ SUBDIRS += r300/dri
+ endif
+ endif
+ 
+ if HAVE_GALLIUM_R600
+-if HAVE_DRI
++if HAVE_DRI2
+ SUBDIRS += r600/dri
+ endif
+ 
+@@ -91,7 +91,7 @@ endif
+ endif
+ 
+ if HAVE_GALLIUM_RADEONSI
+-if HAVE_DRI
++if HAVE_DRI2
+ SUBDIRS += radeonsi/dri
+ endif
+ 
+@@ -105,7 +105,7 @@ endif
+ endif
+ 
+ if HAVE_GALLIUM_NOUVEAU
+-if HAVE_DRI
++if HAVE_DRI2
+ SUBDIRS += dri-nouveau
+ endif
+ 
+@@ -123,7 +123,7 @@ endif
+ endif
+ 
+ if HAVE_GALLIUM_SOFTPIPE
+-if HAVE_DRI
++if HAVE_DRISW
+ SUBDIRS += dri-swrast
+ endif
+ endif
+diff --git a/src/gallium/targets/gbm/Makefile.am b/src/gallium/targets/gbm/Makefile.am
+index a8945a9..889524b 100644
+--- a/src/gallium/targets/gbm/Makefile.am
++++ b/src/gallium/targets/gbm/Makefile.am
+@@ -51,7 +51,7 @@ gbm_gallium_drm_la_LIBADD = \
+ 	$(LIBDRM_LIBS) \
+ 	$(GALLIUM_COMMON_LIB_DEPS)
+ 
+-if HAVE_DRI
++if HAVE_DRISW
+ gbm_gallium_drm_la_LIBADD += \
+ 	$(top_builddir)/src/gallium/winsys/sw/dri/libswdri.la
+ endif
+diff --git a/src/gallium/targets/opencl/Makefile.am b/src/gallium/targets/opencl/Makefile.am
+index ba45aee..7e4c48b 100644
+--- a/src/gallium/targets/opencl/Makefile.am
++++ b/src/gallium/targets/opencl/Makefile.am
+@@ -33,7 +33,7 @@ lib@OPENCL_LIBNAME@_la_LIBADD = \
+ 	-lclangBasic \
+ 	$(LLVM_LIBS)
+ 
+-if HAVE_DRI
++if HAVE_DRISW
+ lib@OPENCL_LIBNAME@_la_LIBADD += \
+ 	$(top_builddir)/src/gallium/winsys/sw/dri/libswdri.la
+ endif
+diff --git a/src/gallium/targets/xa/Makefile.am b/src/gallium/targets/xa/Makefile.am
+index b91c7f5..3f62c35 100644
+--- a/src/gallium/targets/xa/Makefile.am
++++ b/src/gallium/targets/xa/Makefile.am
+@@ -48,7 +48,7 @@ libxatracker_la_LIBADD = \
+ 	$(LIBDRM_LIBS) \
+ 	$(GALLIUM_COMMON_LIB_DEPS)
+ 
+-if HAVE_DRI
++if HAVE_DRISW
+ libxatracker_la_LIBADD += \
+ 	$(top_builddir)/src/gallium/winsys/sw/dri/libswdri.la
+ endif
+diff --git a/src/gallium/tests/trivial/Makefile.am b/src/gallium/tests/trivial/Makefile.am
+index d795ab1..8a8fad1 100644
+--- a/src/gallium/tests/trivial/Makefile.am
++++ b/src/gallium/tests/trivial/Makefile.am
+@@ -17,7 +17,7 @@ LDADD = $(GALLIUM_PIPE_LOADER_CLIENT_LIBS) \
+ 	$(top_builddir)/src/gallium/auxiliary/libgallium.la \
+ 	$(GALLIUM_COMMON_LIB_DEPS)
+ 
+-if HAVE_DRI
++if HAVE_DRISW
+ LDADD += \
+ 	$(top_builddir)/src/gallium/winsys/sw/dri/libswdri.la
+ endif
+diff --git a/src/gallium/winsys/Makefile.am b/src/gallium/winsys/Makefile.am
+index ab1acc3..7d7a0b1 100644
+--- a/src/gallium/winsys/Makefile.am
++++ b/src/gallium/winsys/Makefile.am
+@@ -26,7 +26,7 @@ if NEED_WINSYS_XLIB
+ SUBDIRS += sw/xlib
+ endif
+ 
+-if HAVE_DRI
++if HAVE_DRISW
+ SUBDIRS += sw/dri
+ endif
+ 
+diff --git a/src/gbm/Makefile.am b/src/gbm/Makefile.am
+index f6545ee..08369f2 100644
+--- a/src/gbm/Makefile.am
++++ b/src/gbm/Makefile.am
+@@ -40,7 +40,7 @@ AM_CFLAGS += $(WAYLAND_CFLAGS)
+ libgbm_la_LIBADD += $(top_builddir)/src/egl/wayland/wayland-drm/libwayland-drm.la $(WAYLAND_LIBS)
+ endif
+ 
+-if HAVE_DRI
++if HAVE_DRI2
+ noinst_LTLIBRARIES = libgbm_dri.la
+ libgbm_dri_la_SOURCES = \
+ 	backends/dri/gbm_dri.c \
+diff --git a/src/glx/Makefile.am b/src/glx/Makefile.am
+index 482d952..3fdafc0 100644
+--- a/src/glx/Makefile.am
++++ b/src/glx/Makefile.am
+@@ -82,24 +82,40 @@ libglx_la_SOURCES = \
+ 	  single2.c \
+ 	  singlepix.c \
+ 	  vertarr.c \
+-	  xfont.c \
+ 	  glx_pbuffer.c \
+ 	  glx_query.c \
+-	  drisw_glx.c \
+-	  dri_common.c \
++	  glxhash.c
++
++if HAVE_DRISW
++libglx_la_SOURCES += \
++	  drisw_glx.c
++endif
++
++if HAVE_DRICOMMON
++libglx_la_SOURCES += \
++	  xfont.c \
++	  dri_common.c
++endif
++
++if HAVE_DRI2
++libglx_la_SOURCES += \
+ 	  dri_glx.c \
+ 	  XF86dri.c \
+-	  glxhash.c \
+ 	  dri2_glx.c \
+ 	  dri2.c \
+-	  dri2_query_renderer.c \
+-	  applegl_glx.c
++	  dri2_query_renderer.c
++endif
+ 
+ if HAVE_DRI3
+ libglx_la_SOURCES += \
+           dri3_glx.c
+ endif
+ 
++if HAVE_APPLEDRI
++libglx_la_SOURCES += \
++	  applegl_glx.c
++endif
++
+ libglx_la_LIBADD = $(top_builddir)/src/loader/libloader.la
+ 
+ GL_LIBS = \
+diff --git a/src/glx/tests/Makefile.am b/src/glx/tests/Makefile.am
+index 4dc358c..3599b3d 100644
+--- a/src/glx/tests/Makefile.am
++++ b/src/glx/tests/Makefile.am
+@@ -20,9 +20,13 @@ glx_test_SOURCES =			\
+ 	enum_sizes.cpp			\
+ 	fake_glx_screen.cpp		\
+ 	indirect_api.cpp		\
+-	query_renderer_implementation_unittest.cpp	\
+ 	query_renderer_unittest.cpp
+ 
++if HAVE_DRI2
++glx_test_SOURCES += \
++	query_renderer_implementation_unittest.cpp
++endif
++
+ glx_test_LDADD = \
+ 	$(top_builddir)/src/glx/libglx.la \
+ 	$(top_builddir)/src/gtest/libgtest.la \
+diff --git a/src/mesa/Makefile.am b/src/mesa/Makefile.am
+index 0fdc8f3..88eeff9 100644
+--- a/src/mesa/Makefile.am
++++ b/src/mesa/Makefile.am
+@@ -25,7 +25,7 @@ if HAVE_X11_DRIVER
+ SUBDIRS += drivers/x11
+ endif
+ 
+-if HAVE_DRI
++if HAVE_DRICOMMON
+ SUBDIRS += drivers/dri
+ endif
+ 
+-- 
+1.8.5.5
+
