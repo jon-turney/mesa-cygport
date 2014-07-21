@@ -1,20 +1,25 @@
-From 2d699d250c6378f9187c4cdd94f0f481ce53edc7 Mon Sep 17 00:00:00 2001
+From c7dd202d3942a56d0724a29a685ca880cdd96121 Mon Sep 17 00:00:00 2001
 From: Jon TURNEY <jon.turney@dronecode.org.uk>
 Date: Fri, 4 Jul 2014 01:24:21 +0100
 Subject: [PATCH 6/8] Fixes for building with --enable-egl --enable-gallium-egl
- without DRM
+ without libdrm
 
 Based on a patch by Yaakov Selkowitz
 
+v2: Use HAVE_EGL_DRIVER_DRI2 conditional
 Signed-off-by: Jon TURNEY <jon.turney@dronecode.org.uk>
 ---
- configure.ac                                    | 8 +++++---
- src/gallium/state_trackers/egl/x11/x11_screen.c | 4 ++++
- src/gallium/state_trackers/egl/x11/x11_screen.h | 2 ++
- 3 files changed, 11 insertions(+), 3 deletions(-)
+ configure.ac                                    | 13 ++++++++++---
+ src/gallium/state_trackers/egl/Makefile.am      |  6 +++++-
+ src/gallium/state_trackers/egl/Makefile.sources |  4 ++--
+ src/gallium/state_trackers/egl/SConscript       |  2 +-
+ src/gallium/state_trackers/egl/x11/native_x11.c |  5 +++++
+ src/gallium/state_trackers/egl/x11/x11_screen.c | 18 ++++++++++--------
+ src/gallium/state_trackers/egl/x11/x11_screen.h |  8 +++++---
+ 7 files changed, 38 insertions(+), 18 deletions(-)
 
 diff --git a/configure.ac b/configure.ac
-index b60c4d6..94faf4f 100644
+index b60c4d6..4f80357 100644
 --- a/configure.ac
 +++ b/configure.ac
 @@ -1244,7 +1244,7 @@ if test "x$enable_egl" = xyes; then
@@ -31,30 +36,118 @@ index b60c4d6..94faf4f 100644
          AC_MSG_ERROR([cannot enable egl_gallium without EGL])
      fi
 -    if test "x$have_libdrm" != xyes; then
-+    if test "x$driglx_direct" = xyes && test "x$have_libdrm" != xyes; then
++    if test "x$dri_platform" = xdrm && test "x$have_libdrm" != xyes; then
          AC_MSG_ERROR([egl_gallium requires libdrm >= $LIBDRM_REQUIRED])
      fi
  
-@@ -1496,7 +1496,9 @@ for plat in $egl_platforms; do
+@@ -1496,7 +1496,14 @@ for plat in $egl_platforms; do
  		;;
  
  	x11)
 -		PKG_CHECK_MODULES([XCB_DRI2], [x11-xcb xcb-dri2 >= $XCBDRI2_REQUIRED xcb-xfixes])
-+		PKG_CHECK_MODULES([XCB_DRI2], [x11-xcb xcb-xfixes])
-+# xcb-dri2 >= $XCBDRI2_REQUIRED should only be needed if HAVE_EGL_DRIVER_DRI2, but so should XCB_DRI2...
-+# why HAVE_EGL_DRIVER_DRI2 is on if not static is weird...
++		# xcb-dri2 is only needed if HAVE_EGL_DRIVER_DRI2
++		egl_x11_modules="x11-xcb xcb-xfixes"
++		if test "x$HAVE_EGL_DRIVER_DRI2" != "x"; then
++		   egl_x11_modules="$egl_x11_modules xcb-dri2 >= $XCBDRI2_REQUIRED"
++	        fi
++
++		# XCB_DRI2 is misnamed it's really EGL_X11 or something
++		PKG_CHECK_MODULES([XCB_DRI2], [$egl_x11_modules])
  		;;
  
  	drm)
+diff --git a/src/gallium/state_trackers/egl/Makefile.am b/src/gallium/state_trackers/egl/Makefile.am
+index 26266ed..d58b04b 100644
+--- a/src/gallium/state_trackers/egl/Makefile.am
++++ b/src/gallium/state_trackers/egl/Makefile.am
+@@ -36,7 +36,7 @@ noinst_LTLIBRARIES = libegl.la
+ libegl_la_SOURCES = $(common_FILES)
+ 
+ if HAVE_EGL_PLATFORM_X11
+-libegl_la_SOURCES += $(x11_FILES) $(x11_drm_FILES)
++libegl_la_SOURCES += $(x11_FILES)
+ AM_CFLAGS += \
+ 	$(X11_INCLUDES) \
+ 	$(LIBDRM_CFLAGS) \
+@@ -48,6 +48,10 @@ AM_CPPFLAGS += \
+ 	-I$(top_srcdir)/src/mapi \
+ 	-I$(top_srcdir)/src/mesa \
+ 	-DHAVE_X11_BACKEND
++if HAVE_EGL_DRIVER_DRI2
++libegl_la_SOURCES += $(x11_drm_FILES)
++AM_CFLAGS += -DHAVE_EGL_DRIVER_DRI2
++endif
+ endif
+ 
+ if HAVE_EGL_PLATFORM_WAYLAND
+diff --git a/src/gallium/state_trackers/egl/Makefile.sources b/src/gallium/state_trackers/egl/Makefile.sources
+index 2f60b3a..344aa86 100644
+--- a/src/gallium/state_trackers/egl/Makefile.sources
++++ b/src/gallium/state_trackers/egl/Makefile.sources
+@@ -25,12 +25,12 @@ null_FILES := \
+ 
+ x11_FILES := \
+ 	x11/glxinit.c \
+-	x11/native_dri2.c \
++	x11/x11_screen.c \
+ 	x11/native_x11.c \
+ 	x11/native_ximage.c
+ 
+ x11_drm_FILES := \
+-	x11/x11_screen.c \
++	x11/native_dri2.c \
+ 	x11/dri2.c
+ 
+ wayland_FILES := \
+diff --git a/src/gallium/state_trackers/egl/SConscript b/src/gallium/state_trackers/egl/SConscript
+index 3ddf0bc..53b545c 100644
+--- a/src/gallium/state_trackers/egl/SConscript
++++ b/src/gallium/state_trackers/egl/SConscript
+@@ -28,7 +28,7 @@ else:
+         ])
+         sources.append(env.ParseSourceList('Makefile.sources', 'x11_FILES'))
+         if env['drm']:
+-            env.Append(CPPDEFINES = ['GLX_DIRECT_RENDERING'])
++            env.Append(CPPDEFINES = ['HAVE_EGL_DRIVER_DRI2'])
+             sources.append(env.ParseSourceList('Makefile.sources', 'x11_drm_FILES'))
+     if env['drm'] and False:
+         # XXX: Disabled as it depends on gbm, which is not yet built with scons
+diff --git a/src/gallium/state_trackers/egl/x11/native_x11.c b/src/gallium/state_trackers/egl/x11/native_x11.c
+index 8b6e852..a2d7c43 100644
+--- a/src/gallium/state_trackers/egl/x11/native_x11.c
++++ b/src/gallium/state_trackers/egl/x11/native_x11.c
+@@ -35,17 +35,22 @@ static struct native_display *
+ native_create_display(void *dpy, boolean use_sw)
+ {
+    struct native_display *ndpy = NULL;
++
++#ifdef HAVE_EGL_DRIVER_DRI2
+    boolean force_sw;
+ 
+    force_sw = debug_get_bool_option("EGL_SOFTWARE", FALSE);
+ 
+    if (force_sw || use_sw) {
+       _eglLog(_EGL_INFO, "use software fallback");
++#endif
+       ndpy = x11_create_ximage_display((Display *) dpy, x11_event_handler);
++#ifdef HAVE_EGL_DRIVER_DRI2
+    }
+    else {
+       ndpy = x11_create_dri2_display((Display *) dpy, x11_event_handler);
+    }
++#endif
+ 
+    return ndpy;
+ }
 diff --git a/src/gallium/state_trackers/egl/x11/x11_screen.c b/src/gallium/state_trackers/egl/x11/x11_screen.c
-index f7c5142..d37d463 100644
+index f7c5142..18441af 100644
 --- a/src/gallium/state_trackers/egl/x11/x11_screen.c
 +++ b/src/gallium/state_trackers/egl/x11/x11_screen.c
 @@ -26,7 +26,9 @@
  #include <fcntl.h>
  #include <sys/types.h>
  #include <sys/stat.h>
-+#ifdef GLX_DIRECT_RENDERING
++#ifdef HAVE_EGL_DRIVER_DRI2
  #include <xf86drm.h>
 +#endif
  #include <X11/Xlibint.h>
@@ -64,26 +157,116 @@ index f7c5142..d37d463 100644
  #include "egllog.h"
  
  #include "x11_screen.h"
-+#ifdef GLX_DIRECT_RENDERING
++#ifdef HAVE_EGL_DRIVER_DRI2
  #include "dri2.h"
 +#endif
  #include "glxinit.h"
  
  struct x11_screen {
+@@ -97,17 +101,15 @@ x11_screen_destroy(struct x11_screen *xscr)
+    free(xscr->dri_driver);
+    free(xscr->dri_device);
+ 
+-#ifdef GLX_DIRECT_RENDERING
+    /* xscr->glx_dpy will be destroyed with the X display */
+    if (xscr->glx_dpy)
+       xscr->glx_dpy->xscr = NULL;
+-#endif
+ 
+    free(xscr->visuals);
+    FREE(xscr);
+ }
+ 
+-#ifdef GLX_DIRECT_RENDERING
++#ifdef HAVE_EGL_DRIVER_DRI2
+ 
+ static boolean
+ x11_screen_init_dri2(struct x11_screen *xscr)
+@@ -122,6 +124,8 @@ x11_screen_init_dri2(struct x11_screen *xscr)
+    return (xscr->dri_major >= 0);
+ }
+ 
++#endif /* HAVE_EGL_DRIVER_DRI2 */
++
+ static boolean
+ x11_screen_init_glx(struct x11_screen *xscr)
+ {
+@@ -130,8 +134,6 @@ x11_screen_init_glx(struct x11_screen *xscr)
+    return (xscr->glx_dpy != NULL);
+ }
+ 
+-#endif /* GLX_DIRECT_RENDERING */
+-
+ /**
+  * Return true if the screen supports the extension.
+  */
+@@ -144,10 +146,10 @@ x11_screen_support(struct x11_screen *xscr, enum x11_screen_extension ext)
+    case X11_SCREEN_EXTENSION_XSHM:
+       supported = XShmQueryExtension(xscr->dpy);
+       break;
+-#ifdef GLX_DIRECT_RENDERING
+    case X11_SCREEN_EXTENSION_GLX:
+       supported = x11_screen_init_glx(xscr);
+       break;
++#ifdef HAVE_EGL_DRIVER_DRI2
+    case X11_SCREEN_EXTENSION_DRI2:
+       supported = x11_screen_init_dri2(xscr);
+       break;
+@@ -208,7 +210,7 @@ x11_drawable_get_depth(struct x11_screen *xscr, Drawable drawable)
+    return depth;
+ }
+ 
+-#ifdef GLX_DIRECT_RENDERING
++#ifdef HAVE_EGL_DRIVER_DRI2
+ 
+ /**
+  * Return the GLX fbconfigs.
+@@ -485,4 +487,4 @@ GetGLXDrawable(Display *dpy, XID drawable)
+    return NULL;
+ }
+ 
+-#endif /* GLX_DIRECT_RENDERING */
++#endif /* HAVE_EGL_DRIVER_DRI2 */
 diff --git a/src/gallium/state_trackers/egl/x11/x11_screen.h b/src/gallium/state_trackers/egl/x11/x11_screen.h
-index 0ef724d..91d77f9 100644
+index 0ef724d..b172459 100644
 --- a/src/gallium/state_trackers/egl/x11/x11_screen.h
 +++ b/src/gallium/state_trackers/egl/x11/x11_screen.h
 @@ -27,7 +27,9 @@
  
  #include <X11/Xlib.h>
  #include <X11/Xutil.h>
-+#ifdef GLX_DIRECT_RENDERING
++#ifdef HAVE_EGL_DRIVER_DRI2
  #include <X11/extensions/dri2tokens.h>
 +#endif
  #include "GL/gl.h" /* for GL types needed by __GLcontextModes */
  #include "glcore.h"  /* for __GLcontextModes */
  #include "pipe/p_compiler.h"
+@@ -69,8 +71,6 @@ x11_screen_get_visuals(struct x11_screen *xscr, int *num_visuals);
+ uint
+ x11_drawable_get_depth(struct x11_screen *xscr, Drawable drawable);
+ 
+-#ifdef GLX_DIRECT_RENDERING
+-
+ /* GLX */
+ const __GLcontextModes *
+ x11_screen_get_glx_configs(struct x11_screen *xscr);
+@@ -87,6 +87,8 @@ x11_context_modes_destroy(__GLcontextModes *modes);
+ unsigned
+ x11_context_modes_count(const __GLcontextModes *modes);
+ 
++#ifdef HAVE_EGL_DRIVER_DRI2
++
+ /* DRI2 */
+ const char *
+ x11_screen_probe_dri2(struct x11_screen *xscr, int *major, int *minor);
+@@ -128,6 +130,6 @@ x11_drawable_get_buffers(struct x11_screen *xscr, Drawable drawable,
+                          int *width, int *height, unsigned int *attachments,
+                          boolean with_format, int num_ins, int *num_outs);
+ 
+-#endif /* GLX_DIRECT_RENDERING */
++#endif /* HAVE_EGL_DRIVER_DRI2 */
+ 
+ #endif /* _X11_SCREEN_H_ */
 -- 
 1.8.5.5
 

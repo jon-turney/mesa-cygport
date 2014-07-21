@@ -1,5 +1,5 @@
 NAME="mesa"
-VERSION=10.2.3
+VERSION=10.2.4
 RELEASE=1
 CATEGORY="Libs"
 SUMMARY="X11 OpenGL implementation"
@@ -23,6 +23,7 @@ PATCH_URI="
 	0006-Fixes-for-building-with-enable-egl-enable-gallium-eg.patch
 	0007-osmesa-is-not-a-module.patch
 	0008-Use-.so-extension-for-egl_gallium.patch
+	0009-glx-Fix-build-in-GLX_DIRECT_RENDERING-GLX_USE_APPLEG.patch
 	8.0.2-cygwin-M_PI.patch
 	cygwin-xmlconfig-invocation-name.patch
 	8.0.2-cygwin-soname.patch
@@ -88,7 +89,7 @@ src_compile() {
 	cygconf \
 		--enable-shared --disable-static \
 		--enable-shared-glapi \
-		--enable-dri --disable-dri3 --disable-driglx-direct \
+		--enable-dri --disable-dri3 --enable-driglx-direct \
 		--enable-egl \
 		--enable-gallium-egl \
 		--${ARCH_i686+enable}${ARCH_x86_64+disable}-gallium-llvm \
