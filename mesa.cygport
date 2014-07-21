@@ -24,6 +24,8 @@ PATCH_URI="
 	0007-osmesa-is-not-a-module.patch
 	0008-Use-.so-extension-for-egl_gallium.patch
 	0009-glx-Fix-build-in-GLX_DIRECT_RENDERING-GLX_USE_APPLEG.patch
+	0010-glx-Add-an-error-message-when-a-direct-renderer-s-cr.patch
+	0011-Massage-server-fbconfigs-to-make-them-more-likely-to.patch
 	8.0.2-cygwin-M_PI.patch
 	cygwin-xmlconfig-invocation-name.patch
 	8.0.2-cygwin-soname.patch

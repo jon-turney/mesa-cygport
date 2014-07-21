@@ -1,0 +1,71 @@
+From 3765aa3cb9f791d6da0c5fddc880c370460158d6 Mon Sep 17 00:00:00 2001
+From: Jon TURNEY <jon.turney@dronecode.org.uk>
+Date: Sat, 10 May 2014 10:59:39 +0100
+Subject: [PATCH 11/11] Massage server fbconfigs to make them more likely to
+ match swrast's fbconfigs
+
+- Ignore server performance caveats (doesn't make a great deal of sense to match
+those)
+- Ignore server aux buf count (swrast doesn't provide any, but the server may
+provide them for all fbconfigs)
+
+Signed-off-by: Jon TURNEY <jon.turney@dronecode.org.uk>
+---
+ src/glx/dri_common.c |  3 +++
+ src/glx/drisw_glx.c  | 27 +++++++++++++++++++++++++++
+ 2 files changed, 30 insertions(+)
+
+diff --git a/src/glx/dri_common.c b/src/glx/dri_common.c
+index 8bf4705..dd78450 100644
+--- a/src/glx/dri_common.c
++++ b/src/glx/dri_common.c
+@@ -294,6 +294,9 @@ driConfigEqual(const __DRIcoreExtension *core,
+          break;
+
+       case __DRI_ATTRIB_CONFIG_CAVEAT:
++         if (config->visualRating == GLX_DONT_CARE)
++            break;
++
+          if (value & __DRI_ATTRIB_NON_CONFORMANT_CONFIG)
+             glxValue = GLX_NON_CONFORMANT_CONFIG;
+          else if (value & __DRI_ATTRIB_SLOW_BIT)
+diff --git a/src/glx/drisw_glx.c b/src/glx/drisw_glx.c
+index fcb5d8f..ddfdcd4 100644
+--- a/src/glx/drisw_glx.c
++++ b/src/glx/drisw_glx.c
+@@ -730,6 +730,33 @@ driswCreateScreen(int screen, struct glx_display *priv)
+    extensions = psc->core->getExtensions(psc->driScreen);
+    driswBindExtensions(psc, extensions);
+
++   /* XXX: is this no good for upstream as it would change the fbconfigs seen
++      by DRI2/3, it should work on a copy of the fbconfigs instead ??? */
++   for (struct glx_config *m = psc->base.configs; m; m = m->next) {
++      /* We will ignore any server performance caveats, since they don't
++         affect swrast performance */
++      m->visualRating = GLX_DONT_CARE;
++
++      /* swrast doesn't provide any aux buffers, but XWin may (with some
++         drivers) provide them for all configs, so set the number to zero.
++
++         This could potentially create duplicate fbconfigs, but that isn't
++         forbidden. */
++      m->numAuxBuffers = 0;
++   }
++
++   for (struct glx_config *m = psc->base.visuals; m; m = m->next) {
++      m->visualRating = GLX_DONT_CARE;
++      m->numAuxBuffers = 0;
++   }
++
++   for (struct glx_config *m = psc->base.configs; m; m = m->next) {
++
++   }
++   for (struct glx_config *m = psc->base.visuals; m; m = m->next) {
++
++   }
++
+    configs = driConvertConfigs(psc->core, psc->base.configs, driver_configs);
+    visuals = driConvertConfigs(psc->core, psc->base.visuals, driver_configs);
+
+--
+1.8.5.5
