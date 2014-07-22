@@ -28,6 +28,7 @@ PATCH_URI="
 	cygwin-xmlconfig-invocation-name.patch
 	8.0.2-cygwin-soname.patch
 	8.0.5-enable-strdup-prototype.patch
+	10.2.3-cygwin-os_process.patch
 "
 
 DEPEND="pkgconfig(glproto)
@@ -41,32 +42,34 @@ DEPEND="pkgconfig(glproto)
 	libllvm-devel
 "
 
-PKG_NAMES="mesa dri-drivers libglapi0 libglapi-devel libGL1 libGL-devel
-	libEGL1 libEGL-devel libOpenVG1 libOpenVG-devel libOSMesa8 libOSMesa-devel"
-#           libGLESv1_CM1 libGLESv1_CM-devel libGLESv2_2 libGLESv2-devel
+PKG_NAMES="mesa dri-drivers libglapi0 libGL1 libGL-devel libOSMesa8 libOSMesa-devel
+	libEGL1 libEGL-devel libOpenVG1 libOpenVG-devel
+	libGLESv1_CM1 libGLESv1_CM-devel libGLESv2_2 libGLESv2-devel"
 mesa_CONTENTS="usr/share/doc/"
 libglapi0_SUMMARY="OpenGL internal API library (runtime)"
 libglapi0_CONTENTS="usr/bin/cygglapi-0.dll"
-libglapi_devel_SUMMARY="OpenGL internal API library (development)"
-libglapi_devel_CONTENTS="usr/lib/libglapi.*"
 libGL1_SUMMARY="X11 OpenGL library (runtime)"
+libGL1_REQUIRES="dri-drivers" # for DRI/swrast
 libGL1_CONTENTS="usr/bin/cygGL-1.dll"
 libGL_devel_SUMMARY="X11 OpenGL library (development)"
+libGL_devel_OBSOLETES="libglapi-devel"
 libGL_devel_CONTENTS="--exclude=osmesa*
-                      usr/include/GL/*.h usr/lib/libGL.* usr/lib/pkgconfig/gl.pc"
+	usr/include/GL/ usr/lib/libGL.dll.a usr/lib/libglapi.dll.a
+	usr/lib/pkgconfig/dri.pc usr/lib/pkgconfig/gl.pc"
 libEGL1_SUMMARY="Embedded GL native platform interface library (runtime)"
-libEGL1_REQUIRES="libGL1" # dlopen()ed for egl_glx
 libEGL1_CONTENTS="usr/bin/cygEGL-1.dll usr/lib/egl/"
 libEGL_devel_SUMMARY="Embedded GL native platform interface library (development)"
 libEGL_devel_CONTENTS="usr/include/EGL/ usr/include/KHR/ usr/lib/libEGL.* usr/lib/pkgconfig/egl.pc"
 libGLESv1_CM1_SUMMARY="OpenGL ES 1.1 library (runtime)"
 libGLESv1_CM1_CONTENTS="usr/bin/cygGLESv1_CM-1.dll"
 libGLESv1_CM_devel_SUMMARY="OpenGL ES 1.1 library (development)"
+libGLESv1_CM_devel_REQUIRES="libEGL-devel"
 libGLESv1_CM_devel_CONTENTS="usr/include/GLES/ usr/lib/libGLESv1_CM.* usr/lib/pkgconfig/glesv1_cm.pc"
-libGLESv2_2_SUMMARY="OpenGL ES 2.0 library (runtime)"
+libGLESv2_2_SUMMARY="OpenGL ES 2.0/3.0 library (runtime)"
 libGLESv2_2_CONTENTS="usr/bin/cygGLESv2-2.dll"
-libGLESv2_devel_SUMMARY="OpenGL ES 2.0 library (development)"
-libGLESv2_devel_CONTENTS="usr/include/GLES2/ usr/lib/libGLESv2.* usr/lib/pkgconfig/glesv2.pc"
+libGLESv2_devel_SUMMARY="OpenGL ES 2.0/3.0 library (development)"
+libGLESv2_devel_REQUIRES="libEGL-devel"
+libGLESv2_devel_CONTENTS="usr/include/GLES[23]/ usr/lib/libGLESv2.* usr/lib/pkgconfig/glesv2.pc"
 libOpenVG1_SUMMARY="Vector Graphics acceleration library (runtime)"
 libOpenVG1_CONTENTS="usr/bin/cygOpenVG-1.dll"
 libOpenVG_devel_SUMMARY="Vector Graphics acceleration library (development)"
@@ -78,9 +81,9 @@ libOSMesa_devel_SUMMARY="Mesa Off-Screen rendering library (development)"
 libOSMesa_devel_REQUIRES="libGL-devel"
 libOSMesa_devel_CONTENTS="usr/include/GL/osmesa.h usr/lib/libOSMesa.* usr/lib/pkgconfig/osmesa.pc"
 dri_drivers_SUMMARY="OpenGL DRI drivers"
-dri_drivers_CONTENTS="usr/include/GL/internal/ usr/lib/dri/ usr/lib/pkgconfig/dri.pc etc/drirc"
+dri_drivers_CONTENTS="etc/ usr/lib/dri/"
 
-DIFF_EXCLUDES="docs"
+DIFF_EXCLUDES="docs *.c.out"
 
 src_compile() {
 	cd ${S}
@@ -89,18 +92,21 @@ src_compile() {
 	cygconf \
 		--enable-shared --disable-static \
 		--enable-shared-glapi \
+		--disable-asm \
 		--enable-dri --disable-dri3 --enable-driglx-direct \
 		--enable-egl \
-		--enable-gallium-egl \
-		--${ARCH_i686+enable}${ARCH_x86_64+disable}-gallium-llvm \
-		--disable-gles1 \
-		--disable-gles2 \
+		--enable-gallium-llvm \
+		--enable-gles1 \
+		--enable-gles2 \
 		--enable-glx \
+		--enable-glx-tls \
 		--enable-openvg \
 		--enable-osmesa \
+		--enable-texture-float \
 		--disable-xlib-glx \
 		--with-dri-drivers=swrast \
-		--with-gallium-drivers=swrast
+		--with-gallium-drivers=swrast \
+		--enable-gallium-egl
 
 	cygmake
 }
@@ -109,6 +115,9 @@ src_install() {
 	cd ${B}
 	dodir /usr/bin
 	cyginstall
+
+	# keep indirect the default for now to allow WGL acceleration
+	doenv LIBGL_ALWAYS_INDIRECT 1
 
 	cd ${S}/docs
 	dodoc COPYING README.CYGWIN libGL.txt
@@ -123,3 +132,5 @@ src_test() {
 	cd ${B}
 	make check
 }
+
+KEEP_LA_FILES="none"
