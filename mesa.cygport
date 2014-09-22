@@ -29,6 +29,7 @@ PATCH_URI="
 	0015-Include-_glapi_create_table_from_handle-in-shared-gl.patch
 	0016-Add-Windows-DRI.patch
 	0017-For-testing-purposes-only-use-Windows-DRI-if-explici.patch
+	0018-Windows-DRI-fixes.patch
 	8.0.2-cygwin-M_PI.patch
 	cygwin-xmlconfig-invocation-name.patch
 	8.0.2-cygwin-soname.patch

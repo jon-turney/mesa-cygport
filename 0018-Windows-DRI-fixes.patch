@@ -1,0 +1,246 @@
+From 46e760815571895be0beffcd217f752e4d7e1c8e Mon Sep 17 00:00:00 2001
+From: Jon TURNEY <jon.turney@dronecode.org.uk>
+Date: Sun, 21 Sep 2014 16:26:06 +0100
+Subject: [PATCH] Windows-DRI fixes
+
+Fix transposed pixmap and pbuffer callback functions
+Release resources on pixmap drawable destruction
+Fail bind context if an error occurs
+Resolve WGL extension functions once at startup, so they can be used when a
+context isn't current
+
+Signed-off-by: Jon TURNEY <jon.turney@dronecode.org.uk>
+---
+ src/glx/windows/wgl.c              | 73 ++++++++++++++++++++++++++------------
+ src/glx/windows/wgl.h              |  2 ++
+ src/glx/windows/windows_drawable.c | 34 +++++++++++++++---
+ src/glx/windows/windowsgl.c        |  4 +++
+ 4 files changed, 86 insertions(+), 27 deletions(-)
+
+diff --git a/src/glx/windows/wgl.c b/src/glx/windows/wgl.c
+index e08d198..14cd933 100644
+--- a/src/glx/windows/wgl.c
++++ b/src/glx/windows/wgl.c
+@@ -23,59 +23,86 @@
+ 
+ /*
+   Wrapper functions for calling WGL extension functions
+-
+-  XXX: should handle wglGetProcAddress returning NULL better
+  */
+ 
+ #include "wgl.h"
+ 
++#include <stdio.h>
++
++#define RESOLVE_DECL(type) \
++    static type type##proc = NULL;
++
++#define PRERESOLVE(type, symbol) \
++    type##proc = (type)wglGetProcAddress(symbol); \
++    if (type##proc == NULL) \
++       printf("Can't resolve \"%s\"\n", symbol);
++
++#define CHECK_RESOLVED(type, retval) \
++  if (type##proc == NULL) { \
++    return retval; \
++  }
++
++#define RESOLVED_PROC(type) type##proc
++
++RESOLVE_DECL(PFNWGLGETEXTENSIONSSTRINGARBPROC);
++RESOLVE_DECL(PFNWGLCREATECONTEXTATTRIBSARBPROC);
++RESOLVE_DECL(PFNWGLMAKECONTEXTCURRENTARBPROC);
++RESOLVE_DECL(PFNWGLCREATEPBUFFERARBPROC);
++RESOLVE_DECL(PFNWGLGETPBUFFERDCARBPROC);
++RESOLVE_DECL(PFNWGLRELEASEPBUFFERDCARBPROC);
++RESOLVE_DECL(PFNWGLDESTROYPBUFFERARBPROC);
++
++void wglResolveExtensionProcs(void)
++{
++  PRERESOLVE(PFNWGLGETEXTENSIONSSTRINGARBPROC, "wglGetExtensionsStringARB");
++  PRERESOLVE(PFNWGLCREATECONTEXTATTRIBSARBPROC, "wglCreateContextAttribsARB");
++  PRERESOLVE(PFNWGLMAKECONTEXTCURRENTARBPROC, "wglMakeContextCurrentARB");
++  PRERESOLVE(PFNWGLCREATEPBUFFERARBPROC, "wglCreatePbufferARB");
++  PRERESOLVE(PFNWGLGETPBUFFERDCARBPROC, "wglGetPbufferDCARB");
++  PRERESOLVE(PFNWGLRELEASEPBUFFERDCARBPROC, "wglReleasePbufferDCARB");
++  PRERESOLVE(PFNWGLDESTROYPBUFFERARBPROC, "wglDestroyPbufferARB");
++}
++
+ const char *wglGetExtensionsStringARB(HDC hdc_)
+ {
+-   PFNWGLGETEXTENSIONSSTRINGARBPROC proc;
+-   proc = (PFNWGLGETEXTENSIONSSTRINGARBPROC) wglGetProcAddress("wglGetExtensionsStringARB");
+-   return proc(hdc_);
++   CHECK_RESOLVED(PFNWGLGETEXTENSIONSSTRINGARBPROC, "");
++   return RESOLVED_PROC(PFNWGLGETEXTENSIONSSTRINGARBPROC)(hdc_);
+ }
+ 
+ HGLRC wglCreateContextAttribsARB(HDC hdc_, HGLRC hShareContext_,
+                                      const int *attribList_)
+ {
+-   PFNWGLCREATECONTEXTATTRIBSARBPROC proc;
+-   proc = (PFNWGLCREATECONTEXTATTRIBSARBPROC) wglGetProcAddress("wglCreateContextAttribsARB");
+-   return proc(hdc_, hShareContext_, attribList_);
++   CHECK_RESOLVED(PFNWGLCREATECONTEXTATTRIBSARBPROC, NULL);
++   return RESOLVED_PROC(PFNWGLCREATECONTEXTATTRIBSARBPROC)(hdc_, hShareContext_, attribList_);
+ }
+ 
+ BOOL wglMakeContextCurrentARB(HDC hDrawDC_, HDC hReadDC_, HGLRC hglrc_)
+ {
+-   PFNWGLMAKECONTEXTCURRENTARBPROC proc;
+-   proc = (PFNWGLMAKECONTEXTCURRENTARBPROC)wglGetProcAddress("wglMakeContextCurrentARB");
+-   return proc(hDrawDC_, hReadDC_, hglrc_ );
++   CHECK_RESOLVED(PFNWGLMAKECONTEXTCURRENTARBPROC, FALSE);
++   return RESOLVED_PROC(PFNWGLMAKECONTEXTCURRENTARBPROC)(hDrawDC_, hReadDC_, hglrc_);
+ }
+ 
+ HPBUFFERARB wglCreatePbufferARB(HDC hDC_, int iPixelFormat_, int iWidth_,
+                                 int iHeight_, const int *piAttribList_)
+ {
+-   PFNWGLCREATEPBUFFERARBPROC proc;
+-   proc = (PFNWGLCREATEPBUFFERARBPROC)wglGetProcAddress("wglCreatePbufferARB");
+-   return proc (hDC_, iPixelFormat_, iWidth_, iHeight_, piAttribList_ );
++   CHECK_RESOLVED(PFNWGLCREATEPBUFFERARBPROC, NULL);
++   return RESOLVED_PROC(PFNWGLCREATEPBUFFERARBPROC)(hDC_, iPixelFormat_, iWidth_, iHeight_, piAttribList_);
+ }
+ 
+ HDC wglGetPbufferDCARB(HPBUFFERARB hPbuffer_)
+ {
+-   PFNWGLGETPBUFFERDCARBPROC proc;
+-   proc = (PFNWGLGETPBUFFERDCARBPROC)wglGetProcAddress("wglGetPbufferDCARB");
+-   return proc(hPbuffer_ );
++   CHECK_RESOLVED(PFNWGLGETPBUFFERDCARBPROC, NULL);
++   return RESOLVED_PROC(PFNWGLGETPBUFFERDCARBPROC)(hPbuffer_);
+ }
+ 
+ int wglReleasePbufferDCARB(HPBUFFERARB hPbuffer_, HDC hDC_)
+ {
+-   PFNWGLRELEASEPBUFFERDCARBPROC proc;
+-   proc = (PFNWGLRELEASEPBUFFERDCARBPROC)wglGetProcAddress("wglReleasePbufferDCARB");
+-   return proc(hPbuffer_, hDC_ );
++   CHECK_RESOLVED(PFNWGLRELEASEPBUFFERDCARBPROC, 0)
++   return RESOLVED_PROC(PFNWGLRELEASEPBUFFERDCARBPROC)(hPbuffer_, hDC_);
+ }
+ 
+ BOOL wglDestroyPbufferARB(HPBUFFERARB hPbuffer_)
+ {
+-   PFNWGLDESTROYPBUFFERARBPROC proc;
+-   proc = (PFNWGLDESTROYPBUFFERARBPROC)wglGetProcAddress("wglDestroyPbufferARB");
+-   return proc(hPbuffer_);
++   CHECK_RESOLVED(PFNWGLDESTROYPBUFFERARBPROC, FALSE);
++   return RESOLVED_PROC(PFNWGLDESTROYPBUFFERARBPROC)(hPbuffer_);
+ }
+diff --git a/src/glx/windows/wgl.h b/src/glx/windows/wgl.h
+index 32c375c..043152b 100644
+--- a/src/glx/windows/wgl.h
++++ b/src/glx/windows/wgl.h
+@@ -29,6 +29,8 @@
+ #include <GL/gl.h>
+ #include <GL/wglext.h>
+ 
++void wglResolveExtensionProcs(void);
++
+ const char *wglGetExtensionsStringARB(HDC hdc_);
+ HGLRC wglCreateContextAttribsARB(HDC hdc_, HGLRC hShareContext_,
+                                  const int *attribList_);
+diff --git a/src/glx/windows/windows_drawable.c b/src/glx/windows/windows_drawable.c
+index ffce7d6..53a6408 100644
+--- a/src/glx/windows/windows_drawable.c
++++ b/src/glx/windows/windows_drawable.c
+@@ -58,13 +58,13 @@ static struct windowsdrawable_callbacks window_callbacks = {
+ static
+ HDC pixmap_getdc(windowsDrawable *d)
+ {
+-   return wglGetPbufferDCARB(d->hPbuffer);
++   return d->dibDC;
+ }
+ 
+ static
+ void pixmap_releasedc(windowsDrawable *d, HDC dc)
+ {
+-   wglReleasePbufferDCARB(d->hPbuffer, dc);
++   GdiFlush();
+ }
+ 
+ static struct windowsdrawable_callbacks pixmap_callbacks = {
+@@ -80,13 +80,13 @@ static struct windowsdrawable_callbacks pixmap_callbacks = {
+ static
+ HDC pbuffer_getdc(windowsDrawable *d)
+ {
+-   return d->dibDC;
++   return wglGetPbufferDCARB(d->hPbuffer);
+ }
+ 
+ static
+ void pbuffer_releasedc(windowsDrawable *d, HDC dc)
+ {
+-   GdiFlush();
++   wglReleasePbufferDCARB(d->hPbuffer, dc);
+ }
+ 
+ static struct windowsdrawable_callbacks pbuffer_callbacks = {
+@@ -163,5 +163,31 @@ windows_create_drawable(int type, void *handle)
+ void
+ windows_destroy_drawable(windowsDrawable *drawable)
+ {
++   switch (drawable->callbacks->type)
++   {
++   case WindowsDRIDrawableWindow:
++      break;
++
++   case WindowsDRIDrawablePixmap:
++   {
++      // Select the default DIB into the DC
++      SelectObject(drawable->dibDC, drawable->hOldDIB);
++
++      // delete the screen-compatible DC
++      DeleteDC(drawable->dibDC);
++
++      // Delete the DIB
++      DeleteObject(drawable->hDIB);
++
++      // Close the file mapping object
++      CloseHandle(drawable->hSection);
++   }
++   break;
++
++   case WindowsDRIDrawablePbuffer:
++
++      break;
++   }
++
+    free(drawable);
+ }
+diff --git a/src/glx/windows/windowsgl.c b/src/glx/windows/windowsgl.c
+index 556173e..d7bcd27 100644
+--- a/src/glx/windows/windowsgl.c
++++ b/src/glx/windows/windowsgl.c
+@@ -202,6 +202,7 @@ int windows_bind_context(windowsContext *context, windowsDrawable *draw, windows
+ 
+       if (!ret) {
+          printf("wglMakeContextCurrentARB error: %08x\n", GetLastError());
++         return FALSE;
+       }
+    }
+    else
+@@ -210,6 +211,7 @@ int windows_bind_context(windowsContext *context, windowsDrawable *draw, windows
+       BOOL ret = wglMakeCurrent(drawDc, context->ctx);
+       if (!ret) {
+          printf("wglMakeCurrent error: %08x\n", GetLastError());
++         return FALSE;
+       }
+    }
+ 
+@@ -353,6 +355,8 @@ windows_extensions_test(HDC hdc, void *args)
+    const char *(*proc)(int) = dlsym(dlhandle, "glGetString");
+ 
+    r->gl_extensions = strdup(proc(GL_EXTENSIONS));
++
++   wglResolveExtensionProcs();
+    r->wgl_extensions = strdup(wglGetExtensionsStringARB(hdc));
+ }
+ 
+-- 
+2.1.1
+
