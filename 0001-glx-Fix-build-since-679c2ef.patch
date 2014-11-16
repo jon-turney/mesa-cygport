@@ -1,0 +1,483 @@
+From 3fe7daec14282dc8e2f5c8cc547927e305009677 Mon Sep 17 00:00:00 2001
+From: Jon TURNEY <jon.turney@dronecode.org.uk>
+Date: Sun, 17 Aug 2014 17:22:22 +0100
+Subject: glx: Fix build since 679c2ef "glx/drisw: add support for
+ DRI2rendererQueryExtension", when only building drisw renderer
+
+v2:
+- Move dri*_query_renderer_* into their respective dri*_priv.h headers
+- Drop then unnneeded include of dri2.h from dri2_query_renderer.c
+- Rename dri2_query_renderer.c as dri_common_query_renderer.c, as it's contents
+now are used for more than dri[23]
+
+Signed-off-by: Jon TURNEY <jon.turney@dronecode.org.uk>
+Reviewed-by: Emil Velikov <emil.l.velikov@gmail.com>
+
+diff --git a/src/glx/Makefile.am b/src/glx/Makefile.am
+index cdd898e..4515312 100644
+--- a/src/glx/Makefile.am
++++ b/src/glx/Makefile.am
+@@ -96,7 +96,8 @@ endif
+ if HAVE_DRICOMMON
+ libglx_la_SOURCES += \
+ 	  xfont.c \
+-	  dri_common.c
++	  dri_common.c \
++	  dri_common_query_renderer.c
+ endif
+ 
+ if HAVE_DRI2
+@@ -104,8 +105,7 @@ libglx_la_SOURCES += \
+ 	  dri_glx.c \
+ 	  XF86dri.c \
+ 	  dri2_glx.c \
+-	  dri2.c \
+-	  dri2_query_renderer.c
++	  dri2.c
+ endif
+ 
+ if HAVE_DRI3
+diff --git a/src/glx/dri2.h b/src/glx/dri2.h
+index d07b296..4be5bf8 100644
+--- a/src/glx/dri2.h
++++ b/src/glx/dri2.h
+@@ -88,20 +88,4 @@ DRI2CopyRegion(Display * dpy, XID drawable,
+                XserverRegion region,
+                CARD32 dest, CARD32 src);
+ 
+-_X_HIDDEN int
+-dri2_query_renderer_integer(struct glx_screen *base, int attribute,
+-                            unsigned int *value);
+-
+-_X_HIDDEN int
+-dri2_query_renderer_string(struct glx_screen *base, int attribute,
+-                           const char **value);
+-
+-_X_HIDDEN int
+-dri3_query_renderer_integer(struct glx_screen *base, int attribute,
+-                            unsigned int *value);
+-
+-_X_HIDDEN int
+-dri3_query_renderer_string(struct glx_screen *base, int attribute,
+-                           const char **value);
+-
+ #endif
+diff --git a/src/glx/dri2_priv.h b/src/glx/dri2_priv.h
+index c21eee5..b93d158 100644
+--- a/src/glx/dri2_priv.h
++++ b/src/glx/dri2_priv.h
+@@ -50,3 +50,11 @@ struct dri2_screen {
+ 
+    int show_fps_interval;
+ };
++
++_X_HIDDEN int
++dri2_query_renderer_integer(struct glx_screen *base, int attribute,
++                            unsigned int *value);
++
++_X_HIDDEN int
++dri2_query_renderer_string(struct glx_screen *base, int attribute,
++                           const char **value);
+diff --git a/src/glx/dri2_query_renderer.c b/src/glx/dri2_query_renderer.c
+deleted file mode 100644
+index 247ec1c..0000000
+--- a/src/glx/dri2_query_renderer.c
++++ /dev/null
+@@ -1,186 +0,0 @@
+-/*
+- * Copyright © 2013 Intel Corporation
+- *
+- * Permission is hereby granted, free of charge, to any person obtaining a
+- * copy of this software and associated documentation files (the "Software"),
+- * to deal in the Software without restriction, including without limitation
+- * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+- * and/or sell copies of the Software, and to permit persons to whom the
+- * Software is furnished to do so, subject to the following conditions:
+- *
+- * The above copyright notice and this permission notice (including the next
+- * paragraph) shall be included in all copies or substantial portions of the
+- * Software.
+- *
+- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
+- * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+- * DEALINGS IN THE SOFTWARE.
+- */
+-
+-#if defined(GLX_DIRECT_RENDERING) && !defined(GLX_USE_APPLEGL)
+-
+-#include "glxclient.h"
+-#include "glx_error.h"
+-#include "dri2.h"
+-#include "dri_interface.h"
+-#include "dri2_priv.h"
+-#if defined(HAVE_DRI3)
+-#include "dri3_priv.h"
+-#endif
+-#include "drisw_priv.h"
+-
+-#define __RENDERER(attrib) \
+-    { GLX_RENDERER_##attrib##_MESA, __DRI2_RENDERER_##attrib }
+-
+-static const struct {
+-   unsigned int glx_attrib, dri2_attrib;
+-} query_renderer_map[] = {
+-  __RENDERER(VENDOR_ID),
+-  __RENDERER(DEVICE_ID),
+-  __RENDERER(VERSION),
+-  __RENDERER(ACCELERATED),
+-  __RENDERER(VIDEO_MEMORY),
+-  __RENDERER(UNIFIED_MEMORY_ARCHITECTURE),
+-  __RENDERER(PREFERRED_PROFILE),
+-  __RENDERER(OPENGL_CORE_PROFILE_VERSION),
+-  __RENDERER(OPENGL_COMPATIBILITY_PROFILE_VERSION),
+-  __RENDERER(OPENGL_ES_PROFILE_VERSION),
+-  __RENDERER(OPENGL_ES2_PROFILE_VERSION),
+-};
+-
+-#undef __RENDERER
+-
+-static int
+-dri2_convert_glx_query_renderer_attribs(int attribute)
+-{
+-   int i;
+-
+-   for (i = 0; i < ARRAY_SIZE(query_renderer_map); i++)
+-      if (query_renderer_map[i].glx_attrib == attribute)
+-         return query_renderer_map[i].dri2_attrib;
+-
+-   return -1;
+-}
+-
+-_X_HIDDEN int
+-dri2_query_renderer_integer(struct glx_screen *base, int attribute,
+-                            unsigned int *value)
+-{
+-   struct dri2_screen *const psc = (struct dri2_screen *) base;
+-
+-   /* Even though there are invalid values (and
+-    * dri2_convert_glx_query_renderer_attribs may return -1), the higher level
+-    * GLX code is required to perform the filtering.  Assume that we got a
+-    * good value.
+-    */
+-   const int dri_attribute = dri2_convert_glx_query_renderer_attribs(attribute);
+-
+-   if (psc->rendererQuery == NULL)
+-      return -1;
+-
+-   return psc->rendererQuery->queryInteger(psc->driScreen, dri_attribute,
+-                                           value);
+-}
+-
+-_X_HIDDEN int
+-dri2_query_renderer_string(struct glx_screen *base, int attribute,
+-                           const char **value)
+-{
+-   struct dri2_screen *const psc = (struct dri2_screen *) base;
+-
+-   /* Even though queryString only accepts a subset of the possible GLX
+-    * queries, the higher level GLX code is required to perform the filtering.
+-    * Assume that we got a good value.
+-    */
+-   const int dri_attribute = dri2_convert_glx_query_renderer_attribs(attribute);
+-
+-   if (psc->rendererQuery == NULL)
+-      return -1;
+-
+-   return psc->rendererQuery->queryString(psc->driScreen, dri_attribute, value);
+-}
+-
+-#if defined(HAVE_DRI3)
+-_X_HIDDEN int
+-dri3_query_renderer_integer(struct glx_screen *base, int attribute,
+-                            unsigned int *value)
+-{
+-   struct dri3_screen *const psc = (struct dri3_screen *) base;
+-
+-   /* Even though there are invalid values (and
+-    * dri2_convert_glx_query_renderer_attribs may return -1), the higher level
+-    * GLX code is required to perform the filtering.  Assume that we got a
+-    * good value.
+-    */
+-   const int dri_attribute = dri2_convert_glx_query_renderer_attribs(attribute);
+-
+-   if (psc->rendererQuery == NULL)
+-      return -1;
+-
+-   return psc->rendererQuery->queryInteger(psc->driScreen, dri_attribute,
+-                                           value);
+-}
+-
+-_X_HIDDEN int
+-dri3_query_renderer_string(struct glx_screen *base, int attribute,
+-                           const char **value)
+-{
+-   struct dri3_screen *const psc = (struct dri3_screen *) base;
+-
+-   /* Even though queryString only accepts a subset of the possible GLX
+-    * queries, the higher level GLX code is required to perform the filtering.
+-    * Assume that we got a good value.
+-    */
+-   const int dri_attribute = dri2_convert_glx_query_renderer_attribs(attribute);
+-
+-   if (psc->rendererQuery == NULL)
+-      return -1;
+-
+-   return psc->rendererQuery->queryString(psc->driScreen, dri_attribute, value);
+-}
+-#endif /* HAVE_DRI3 */
+-
+-_X_HIDDEN int
+-drisw_query_renderer_integer(struct glx_screen *base, int attribute,
+-                             unsigned int *value)
+-{
+-   struct drisw_screen *const psc = (struct drisw_screen *) base;
+-
+-   /* Even though there are invalid values (and
+-    * dri2_convert_glx_query_renderer_attribs may return -1), the higher level
+-    * GLX code is required to perform the filtering.  Assume that we got a
+-    * good value.
+-    */
+-   const int dri_attribute = dri2_convert_glx_query_renderer_attribs(attribute);
+-
+-   if (psc->rendererQuery == NULL)
+-      return -1;
+-
+-   return psc->rendererQuery->queryInteger(psc->driScreen, dri_attribute,
+-                                           value);
+-}
+-
+-_X_HIDDEN int
+-drisw_query_renderer_string(struct glx_screen *base, int attribute,
+-                            const char **value)
+-{
+-   struct drisw_screen *const psc = (struct drisw_screen *) base;
+-
+-   /* Even though queryString only accepts a subset of the possible GLX
+-    * queries, the higher level GLX code is required to perform the filtering.
+-    * Assume that we got a good value.
+-    */
+-   const int dri_attribute = dri2_convert_glx_query_renderer_attribs(attribute);
+-
+-   if (psc->rendererQuery == NULL)
+-      return -1;
+-
+-   return psc->rendererQuery->queryString(psc->driScreen, dri_attribute, value);
+-}
+-
+-
+-#endif /* GLX_DIRECT_RENDERING */
+diff --git a/src/glx/dri3_priv.h b/src/glx/dri3_priv.h
+index c0e35ee..248fa28 100644
+--- a/src/glx/dri3_priv.h
++++ b/src/glx/dri3_priv.h
+@@ -195,3 +195,12 @@ struct dri3_drawable {
+    xcb_gcontext_t gc;
+    xcb_special_event_t *special_event;
+ };
++
++
++_X_HIDDEN int
++dri3_query_renderer_integer(struct glx_screen *base, int attribute,
++                            unsigned int *value);
++
++_X_HIDDEN int
++dri3_query_renderer_string(struct glx_screen *base, int attribute,
++                           const char **value);
+diff --git a/src/glx/dri_common_query_renderer.c b/src/glx/dri_common_query_renderer.c
+new file mode 100644
+index 0000000..d598b12
+--- /dev/null
++++ b/src/glx/dri_common_query_renderer.c
+@@ -0,0 +1,185 @@
++/*
++ * Copyright © 2013 Intel Corporation
++ *
++ * Permission is hereby granted, free of charge, to any person obtaining a
++ * copy of this software and associated documentation files (the "Software"),
++ * to deal in the Software without restriction, including without limitation
++ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
++ * and/or sell copies of the Software, and to permit persons to whom the
++ * Software is furnished to do so, subject to the following conditions:
++ *
++ * The above copyright notice and this permission notice (including the next
++ * paragraph) shall be included in all copies or substantial portions of the
++ * Software.
++ *
++ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
++ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
++ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
++ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
++ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
++ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
++ * DEALINGS IN THE SOFTWARE.
++ */
++
++#if defined(GLX_DIRECT_RENDERING) && !defined(GLX_USE_APPLEGL)
++
++#include "glxclient.h"
++#include "glx_error.h"
++#include "dri_interface.h"
++#include "dri2_priv.h"
++#if defined(HAVE_DRI3)
++#include "dri3_priv.h"
++#endif
++#include "drisw_priv.h"
++
++#define __RENDERER(attrib) \
++    { GLX_RENDERER_##attrib##_MESA, __DRI2_RENDERER_##attrib }
++
++static const struct {
++   unsigned int glx_attrib, dri2_attrib;
++} query_renderer_map[] = {
++  __RENDERER(VENDOR_ID),
++  __RENDERER(DEVICE_ID),
++  __RENDERER(VERSION),
++  __RENDERER(ACCELERATED),
++  __RENDERER(VIDEO_MEMORY),
++  __RENDERER(UNIFIED_MEMORY_ARCHITECTURE),
++  __RENDERER(PREFERRED_PROFILE),
++  __RENDERER(OPENGL_CORE_PROFILE_VERSION),
++  __RENDERER(OPENGL_COMPATIBILITY_PROFILE_VERSION),
++  __RENDERER(OPENGL_ES_PROFILE_VERSION),
++  __RENDERER(OPENGL_ES2_PROFILE_VERSION),
++};
++
++#undef __RENDERER
++
++static int
++dri2_convert_glx_query_renderer_attribs(int attribute)
++{
++   int i;
++
++   for (i = 0; i < ARRAY_SIZE(query_renderer_map); i++)
++      if (query_renderer_map[i].glx_attrib == attribute)
++         return query_renderer_map[i].dri2_attrib;
++
++   return -1;
++}
++
++_X_HIDDEN int
++dri2_query_renderer_integer(struct glx_screen *base, int attribute,
++                            unsigned int *value)
++{
++   struct dri2_screen *const psc = (struct dri2_screen *) base;
++
++   /* Even though there are invalid values (and
++    * dri2_convert_glx_query_renderer_attribs may return -1), the higher level
++    * GLX code is required to perform the filtering.  Assume that we got a
++    * good value.
++    */
++   const int dri_attribute = dri2_convert_glx_query_renderer_attribs(attribute);
++
++   if (psc->rendererQuery == NULL)
++      return -1;
++
++   return psc->rendererQuery->queryInteger(psc->driScreen, dri_attribute,
++                                           value);
++}
++
++_X_HIDDEN int
++dri2_query_renderer_string(struct glx_screen *base, int attribute,
++                           const char **value)
++{
++   struct dri2_screen *const psc = (struct dri2_screen *) base;
++
++   /* Even though queryString only accepts a subset of the possible GLX
++    * queries, the higher level GLX code is required to perform the filtering.
++    * Assume that we got a good value.
++    */
++   const int dri_attribute = dri2_convert_glx_query_renderer_attribs(attribute);
++
++   if (psc->rendererQuery == NULL)
++      return -1;
++
++   return psc->rendererQuery->queryString(psc->driScreen, dri_attribute, value);
++}
++
++#if defined(HAVE_DRI3)
++_X_HIDDEN int
++dri3_query_renderer_integer(struct glx_screen *base, int attribute,
++                            unsigned int *value)
++{
++   struct dri3_screen *const psc = (struct dri3_screen *) base;
++
++   /* Even though there are invalid values (and
++    * dri2_convert_glx_query_renderer_attribs may return -1), the higher level
++    * GLX code is required to perform the filtering.  Assume that we got a
++    * good value.
++    */
++   const int dri_attribute = dri2_convert_glx_query_renderer_attribs(attribute);
++
++   if (psc->rendererQuery == NULL)
++      return -1;
++
++   return psc->rendererQuery->queryInteger(psc->driScreen, dri_attribute,
++                                           value);
++}
++
++_X_HIDDEN int
++dri3_query_renderer_string(struct glx_screen *base, int attribute,
++                           const char **value)
++{
++   struct dri3_screen *const psc = (struct dri3_screen *) base;
++
++   /* Even though queryString only accepts a subset of the possible GLX
++    * queries, the higher level GLX code is required to perform the filtering.
++    * Assume that we got a good value.
++    */
++   const int dri_attribute = dri2_convert_glx_query_renderer_attribs(attribute);
++
++   if (psc->rendererQuery == NULL)
++      return -1;
++
++   return psc->rendererQuery->queryString(psc->driScreen, dri_attribute, value);
++}
++#endif /* HAVE_DRI3 */
++
++_X_HIDDEN int
++drisw_query_renderer_integer(struct glx_screen *base, int attribute,
++                             unsigned int *value)
++{
++   struct drisw_screen *const psc = (struct drisw_screen *) base;
++
++   /* Even though there are invalid values (and
++    * dri2_convert_glx_query_renderer_attribs may return -1), the higher level
++    * GLX code is required to perform the filtering.  Assume that we got a
++    * good value.
++    */
++   const int dri_attribute = dri2_convert_glx_query_renderer_attribs(attribute);
++
++   if (psc->rendererQuery == NULL)
++      return -1;
++
++   return psc->rendererQuery->queryInteger(psc->driScreen, dri_attribute,
++                                           value);
++}
++
++_X_HIDDEN int
++drisw_query_renderer_string(struct glx_screen *base, int attribute,
++                            const char **value)
++{
++   struct drisw_screen *const psc = (struct drisw_screen *) base;
++
++   /* Even though queryString only accepts a subset of the possible GLX
++    * queries, the higher level GLX code is required to perform the filtering.
++    * Assume that we got a good value.
++    */
++   const int dri_attribute = dri2_convert_glx_query_renderer_attribs(attribute);
++
++   if (psc->rendererQuery == NULL)
++      return -1;
++
++   return psc->rendererQuery->queryString(psc->driScreen, dri_attribute, value);
++}
++
++
++#endif /* GLX_DIRECT_RENDERING */
+-- 
+cgit v0.10.2
+

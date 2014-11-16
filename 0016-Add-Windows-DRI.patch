@@ -81,8 +81,8 @@ index 7503692..513736c3 100644
  AC_ARG_ENABLE([shared-glapi],
      [AS_HELP_STRING([--enable-shared-glapi],
 @@ -914,6 +917,9 @@ xyesno)
-                dri_modules="$dri_modules xcb-dri3 xcb-present xcb-sync xshmfence >= $XSHMFENCE_REQUIRED"
-             fi
+         if test x"$dri_platform" = xapple ; then
+             DEFINES="$DEFINES -DGLX_USE_APPLEGL"
          fi
 +        if test x"$dri_platform" = xwindows ; then
 +            DEFINES="$DEFINES -DGLX_USE_WINDOWSGL"
@@ -91,8 +91,8 @@ index 7503692..513736c3 100644
  
      # add xf86vidmode if available
 @@ -2153,6 +2159,8 @@ AC_CONFIG_FILES([Makefile
- 		src/glsl/Makefile
  		src/glx/Makefile
+ 		src/glx/apple/Makefile
  		src/glx/tests/Makefile
 +		src/glx/windows/Makefile
 +		src/glx/windows/windowsdriproto.pc
@@ -103,29 +103,11 @@ diff --git a/src/glx/Makefile.am b/src/glx/Makefile.am
 index 3fdafc0..43f41f7 100644
 --- a/src/glx/Makefile.am
 +++ b/src/glx/Makefile.am
-@@ -24,7 +24,7 @@ SHARED_GLAPI_CFLAGS = -DGLX_SHARED_GLAPI
- SHARED_GLAPI_LIB = $(top_builddir)/src/mapi/shared-glapi/libglapi.la
+@@ -120,6 +120,16 @@
+ SUBDIRS += apple
+ libglx_la_LIBADD += $(builddir)/apple/libappleglx.la
  endif
- 
--SUBDIRS=. tests
-+SUBDIRS =
- 
- if HAVE_XF86VIDMODE
- EXTRA_DEFINES_XF86VIDMODE = -DXF86VIDMODE
-@@ -86,6 +86,8 @@ libglx_la_SOURCES = \
- 	  glx_query.c \
- 	  glxhash.c
- 
-+libglx_la_LIBADD = $(top_builddir)/src/loader/libloader.la
 +
- if HAVE_DRISW
- libglx_la_SOURCES += \
- 	  drisw_glx.c
-@@ -116,7 +118,15 @@ libglx_la_SOURCES += \
- 	  applegl_glx.c
- endif
- 
--libglx_la_LIBADD = $(top_builddir)/src/loader/libloader.la
 +if HAVE_WINDOWSDRI
 +libglx_la_SOURCES += \
 +	  driwindows_glx.c
@@ -138,7 +120,7 @@ index 3fdafc0..43f41f7 100644
  
  GL_LIBS = \
  	libglx.la \
-@@ -135,4 +145,10 @@ lib@GL_LIB@_la_SOURCES =
+@@ -138,6 +148,10 @@ lib@GL_LIB@_la_SOURCES =
  lib@GL_LIB@_la_LIBADD = $(GL_LIBS)
  lib@GL_LIB@_la_LDFLAGS = $(GL_LDFLAGS)
  
@@ -146,8 +128,8 @@ index 3fdafc0..43f41f7 100644
 +lib@GL_LIB@_la_LDFLAGS += -lgdi32 -lopengl32 -Wl,--disable-stdcall-fixup
 +endif
 +
-+SUBDIRS += . tests
-+
+ SUBDIRS += . tests
+ 
  include $(top_srcdir)/install-lib-links.mk
 diff --git a/src/glx/driwindows_glx.c b/src/glx/driwindows_glx.c
 new file mode 100644

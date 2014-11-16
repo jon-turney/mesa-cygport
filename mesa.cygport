@@ -1,5 +1,5 @@
 NAME="mesa"
-VERSION=10.2.9
+VERSION=10.3.3
 RELEASE=1
 CATEGORY="Libs"
 SUMMARY="X11 OpenGL implementation"
@@ -10,32 +10,22 @@ emulation to complete hardware acceleration for modern GPUs."
 HOMEPAGE="http://www.mesa3d.org/"
 SRC_URI="ftp://ftp.freedesktop.org/pub/mesa/${VERSION}/MesaLib-${VERSION}.tar.bz2"
 SRC_DIR="Mesa-${VERSION}"
-
-#	fedora/mesa-8.0-llvmpipe-shmget.patch
-#	fedora/mesa-8.0.1-fix-16bpp.patch
-
 PATCH_URI="
-	0001-Make-DRI-dependencies-and-build-depend-on-the-target.patch
-	0002-targets-dri-swrast-explicitly-link-against-glapi-use.patch
-	0003-megadriver-explicitly-link-against-glapi-link-with-n.patch
-	0004-Remove-checks-for-shared-LLVM-which-assume-.so-is-li.patch
-	0005-Avoid-mesa_dri_drivers-import-lib-being-installed.patch
+	0001-glx-Fix-build-since-679c2ef.patch
 	0006-Fixes-for-building-with-enable-egl-enable-gallium-eg.patch
 	0007-osmesa-is-not-a-module.patch
 	0008-Use-.so-extension-for-egl_gallium.patch
-	0009-glx-Fix-build-in-GLX_DIRECT_RENDERING-GLX_USE_APPLEG.patch
-	0010-glx-Add-an-error-message-when-a-direct-renderer-s-cr.patch
 	0011-Massage-server-fbconfigs-to-make-them-more-likely-to.patch
-	0015-Include-_glapi_create_table_from_handle-in-shared-gl.patch
 	0016-Add-Windows-DRI.patch
 	0017-For-testing-purposes-only-use-Windows-DRI-if-explici.patch
 	0018-Windows-DRI-fixes.patch
-	8.0.2-cygwin-M_PI.patch
-	cygwin-xmlconfig-invocation-name.patch
 	8.0.2-cygwin-soname.patch
-	8.0.5-enable-strdup-prototype.patch
-	10.2.3-cygwin-os_process.patch
+	10.3.3-cygwin-shared-llvm.patch
+	10.3.3-drivers-no-undefined.patch
 "
+
+# created by patches
+DISTCLEANFILES="src/glx/dri_common_query_renderer.c src/glx/driwindows_glx.c src/glx/windows/*"
 
 DEPEND="pkgconfig(glproto)
 	pkgconfig(x11)
@@ -104,7 +94,7 @@ src_compile() {
 		--disable-asm \
 		--enable-dri --disable-dri3 --enable-driglx-direct \
 		--enable-egl \
-		--enable-gallium-llvm \
+		--enable-gallium-llvm --enable-llvm-shared-libs \
 		--enable-gles1 \
 		--enable-gles2 \
 		--enable-glx \
