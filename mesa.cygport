@@ -115,9 +115,6 @@ src_install() {
 	dodir /usr/bin
 	cyginstall
 
-	# keep indirect the default for now to allow WGL acceleration
-	doenv LIBGL_ALWAYS_INDIRECT 1
-
 	cd ${S}/docs
 	dodoc COPYING README.CYGWIN libGL.txt
 
