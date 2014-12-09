@@ -1,5 +1,5 @@
 NAME="mesa"
-VERSION=10.3.3
+VERSION=10.3.5
 RELEASE=1
 CATEGORY="Libs"
 SUMMARY="X11 OpenGL implementation"
@@ -122,7 +122,7 @@ src_install() {
 	dodoc *.html *.css *.png specs specs/old relnotes
 }
 
-# can't use the default src_test, as 'make -n check' fails the first time as
+# cannot use the default src_test, as 'make -n check' fails the first time as
 # there are no proper dependencies on src/gtest, so provide our own.
 src_test() {
 	cd ${B}
