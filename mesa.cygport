@@ -1,5 +1,5 @@
 NAME="mesa"
-VERSION=10.3.5
+VERSION=10.3.6
 RELEASE=1
 CATEGORY="Libs"
 SUMMARY="X11 OpenGL implementation"
