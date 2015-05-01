@@ -1,0 +1,11 @@
+--- origsrc/mesa-10.5.4/src/gallium/auxiliary/util/u_math.h	2015-04-24 16:09:35.000000000 -0500
++++ src/mesa-10.5.4/src/gallium/auxiliary/util/u_math.h	2015-04-30 23:33:16.002707600 -0500
+@@ -528,7 +528,7 @@ unsigned ffs( unsigned u )
+ 
+    return i;
+ }
+-#elif defined(__MINGW32__) || defined(PIPE_OS_ANDROID)
++#elif defined(__MINGW32__) || defined(__CYGWIN__) || defined(PIPE_OS_ANDROID)
+ #define ffs __builtin_ffs
+ #define ffsll __builtin_ffsll
+ #endif

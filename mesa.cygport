@@ -1,5 +1,5 @@
 NAME="mesa"
-VERSION=10.3.7
+VERSION=10.5.4
 RELEASE=1
 CATEGORY="Libs"
 SUMMARY="X11 OpenGL implementation"
@@ -8,24 +8,23 @@ a system for rendering interactive 3D graphics. A variety of device drivers
 allows Mesa to be used in many different environments ranging from software
 emulation to complete hardware acceleration for modern GPUs."
 HOMEPAGE="http://www.mesa3d.org/"
-SRC_URI="ftp://ftp.freedesktop.org/pub/mesa/${VERSION}/MesaLib-${VERSION}.tar.bz2"
-SRC_DIR="Mesa-${VERSION}"
+SRC_URI="ftp://ftp.freedesktop.org/pub/mesa/${VERSION}/mesa-${VERSION}.tar.xz"
+SRC_DIR="mesa-${VERSION}"
 PATCH_URI="
-	0001-glx-Fix-build-since-679c2ef.patch
-	0006-Fixes-for-building-with-enable-egl-enable-gallium-eg.patch
 	0007-osmesa-is-not-a-module.patch
-	0008-Use-.so-extension-for-egl_gallium.patch
 	0011-Massage-server-fbconfigs-to-make-them-more-likely-to.patch
 	0016-Add-Windows-DRI.patch
 	0017-For-testing-purposes-only-use-Windows-DRI-if-explici.patch
 	0018-Windows-DRI-fixes.patch
-	8.0.2-cygwin-soname.patch
+	10.5.4-cygwin-soname.patch
 	10.3.3-cygwin-shared-llvm.patch
+	10.5.4-cygwin-ffsll.patch
 	10.3.3-drivers-no-undefined.patch
+	10.5.4-egl-swrast.patch
 "
 
 # created by patches
-DISTCLEANFILES="src/glx/dri_common_query_renderer.c src/glx/driwindows_glx.c src/glx/windows/*"
+DISTCLEANFILES="src/glx/driwindows_glx.c src/glx/windows/*"
 
 DEPEND="pkgconfig(glproto)
 	pkgconfig(x11)
@@ -39,8 +38,7 @@ DEPEND="pkgconfig(glproto)
 "
 
 PKG_NAMES="mesa dri-drivers libglapi0 libGL1 libGL-devel libOSMesa8 libOSMesa-devel
-	libEGL1 libEGL-devel libOpenVG1 libOpenVG-devel
-	libGLESv1_CM1 libGLESv1_CM-devel libGLESv2_2 libGLESv2-devel
+	libEGL1 libEGL-devel libGLESv2_2 libGLESv2-devel
 	windowsdriproto"
 mesa_CONTENTS="usr/share/doc/"
 libglapi0_SUMMARY="OpenGL internal API library (runtime)"
@@ -54,7 +52,8 @@ libGL_devel_CONTENTS="--exclude=osmesa*
 	usr/include/GL/ usr/lib/libGL.dll.a usr/lib/libglapi.dll.a
 	usr/lib/pkgconfig/dri.pc usr/lib/pkgconfig/gl.pc"
 libEGL1_SUMMARY="Embedded GL native platform interface library (runtime)"
-libEGL1_CONTENTS="usr/bin/cygEGL-1.dll usr/lib/egl/"
+libEGL1_REQUIRES="dri-drivers libglapi0" # for DRI2/swrast
+libEGL1_CONTENTS="usr/bin/cygEGL-1.dll"
 libEGL_devel_SUMMARY="Embedded GL native platform interface library (development)"
 libEGL_devel_CONTENTS="usr/include/EGL/ usr/include/KHR/ usr/lib/libEGL.* usr/lib/pkgconfig/egl.pc"
 libGLESv1_CM1_SUMMARY="OpenGL ES 1.1 library (runtime)"
@@ -95,17 +94,17 @@ src_compile() {
 		--enable-dri --disable-dri3 --enable-driglx-direct \
 		--enable-egl \
 		--enable-gallium-llvm --enable-llvm-shared-libs \
-		--enable-gles1 \
+		--disable-gles1 \
 		--enable-gles2 \
 		--enable-glx \
 		--enable-glx-tls \
-		--enable-openvg \
+		--disable-openvg \
 		--enable-osmesa \
 		--enable-texture-float \
 		--disable-xlib-glx \
 		--with-dri-drivers=swrast \
 		--with-gallium-drivers=swrast \
-		--enable-gallium-egl
+		--with-egl-platforms=x11
 
 	cygmake
 }
