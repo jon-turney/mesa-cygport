@@ -1,6 +1,6 @@
 NAME="mesa"
 VERSION=10.5.4
-RELEASE=1
+RELEASE=2
 CATEGORY="Libs"
 SUMMARY="X11 OpenGL implementation"
 DESCRIPTION="Mesa is an open-source implementation of the OpenGL specification,
