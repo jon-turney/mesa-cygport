@@ -65,8 +65,8 @@ index 7503692..513736c3 100644
  case "$host_os" in
  darwin*)
      dri_platform='apple' ;;
--gnu*|mingw*|cygwin*)
-+cygwin*|mingw*)
+-gnu*|cygwin*)
++cygwin*)
 +    dri_platform='windows' ;;
 +gnu*)
      dri_platform='none' ;;
@@ -824,7 +824,7 @@ new file mode 100644
 index 0000000..3daedda
 --- /dev/null
 +++ b/src/glx/windows/Makefile.am
-@@ -0,0 +1,30 @@
+@@ -0,0 +1,31 @@
 +noinst_LTLIBRARIES = libwindowsdri.la libwindowsglx.la
 +
 +# protocol defines for the Windows-DRI server extension
@@ -847,6 +847,7 @@ index 0000000..3daedda
 +
 +libwindowsglx_la_CFLAGS = \
 +	-I$(top_srcdir)/include \
++	-I$(top_srcdir)/src \
 +	-I$(top_srcdir)/src/glx \
 +	-I$(top_srcdir)/src/mapi \
 +	-I$(top_srcdir)/src/mapi/glapi \
@@ -1392,7 +1393,7 @@ new file mode 100644
 index 0000000..556173e
 --- /dev/null
 +++ b/src/glx/windows/windowsgl.c
-@@ -0,0 +1,383 @@
+@@ -0,0 +1,384 @@
 +/*
 + * Copyright © 2014 Jon TURNEY
 + *
@@ -1424,6 +1425,7 @@ index 0000000..556173e
 +
 +#include <dlfcn.h>
 +#include <assert.h>
++#include <stdio.h>
 +#include <strings.h>
 +
 +static struct _glapi_table *windows_api = NULL;

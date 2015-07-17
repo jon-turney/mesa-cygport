@@ -1,6 +1,6 @@
---- origsrc/mesa-10.5.4/configure.ac	2015-05-01 01:07:14.504706500 -0500
-+++ src/mesa-10.5.4/configure.ac	2015-05-01 01:04:34.953946100 -0500
-@@ -1639,7 +1639,14 @@ for plat in $egl_platforms; do
+--- origsrc/mesa-10.6.2/configure.ac	2015-07-12 11:22:22.319511900 -0500
++++ src/mesa-10.6.2/configure.ac	2015-07-12 11:21:47.656251400 -0500
+@@ -1641,7 +1641,14 @@ for plat in $egl_platforms; do
  		;;
  
  	x11)
@@ -16,9 +16,9 @@
  		;;
  
  	drm)
---- origsrc/mesa-10.5.4/src/egl/drivers/dri2/egl_dri2.h	2015-04-24 16:09:35.000000000 -0500
-+++ src/mesa-10.5.4/src/egl/drivers/dri2/egl_dri2.h	2015-05-01 00:57:36.057753000 -0500
-@@ -30,7 +30,9 @@
+--- origsrc/mesa-10.6.2/src/egl/drivers/dri2/egl_dri2.h	2015-07-11 13:42:14.000000000 -0500
++++ src/mesa-10.6.2/src/egl/drivers/dri2/egl_dri2.h	2015-07-12 11:21:47.001050300 -0500
+@@ -32,7 +32,9 @@
  
  #ifdef HAVE_X11_PLATFORM
  #include <xcb/xcb.h>
@@ -28,9 +28,9 @@
  #include <xcb/xfixes.h>
  #include <X11/Xlib-xcb.h>
  #endif
---- origsrc/mesa-10.5.4/src/egl/drivers/dri2/platform_x11.c	2015-04-24 16:09:35.000000000 -0500
-+++ src/mesa-10.5.4/src/egl/drivers/dri2/platform_x11.c	2015-05-01 01:03:48.646065700 -0500
-@@ -271,9 +271,13 @@ dri2_x11_create_surface(_EGLDriver *drv,
+--- origsrc/mesa-10.6.2/src/egl/drivers/dri2/platform_x11.c	2015-07-11 13:42:14.000000000 -0500
++++ src/mesa-10.6.2/src/egl/drivers/dri2/platform_x11.c	2015-07-12 11:21:47.016650300 -0500
+@@ -272,9 +272,13 @@ dri2_x11_create_surface(_EGLDriver *drv,
        free(reply);
     }
  
@@ -44,7 +44,7 @@
        if (type == EGL_PBUFFER_BIT) {
           dri2_surf->depth = _eglGetConfigKey(conf, EGL_BUFFER_SIZE);
        }
-@@ -352,9 +356,13 @@ dri2_x11_destroy_surface(_EGLDriver *drv
+@@ -353,9 +357,13 @@ dri2_x11_destroy_surface(_EGLDriver *drv
  
     (*dri2_dpy->core->destroyDrawable)(dri2_surf->dri_drawable);
     
@@ -58,7 +58,7 @@
        assert(dri2_dpy->swrast);
        swrastDestroyDrawable(dri2_dpy, dri2_surf);
     }
-@@ -367,6 +375,7 @@ dri2_x11_destroy_surface(_EGLDriver *drv
+@@ -368,6 +376,7 @@ dri2_x11_destroy_surface(_EGLDriver *drv
     return EGL_TRUE;
  }
  
@@ -66,7 +66,7 @@
  /**
   * Process list of buffer received from the server
   *
-@@ -645,6 +654,7 @@ dri2_x11_local_authenticate(_EGLDisplay
+@@ -646,6 +655,7 @@ dri2_x11_local_authenticate(_EGLDisplay
  #endif
     return EGL_TRUE;
  }
@@ -74,7 +74,7 @@
  
  static EGLBoolean
  dri2_x11_add_configs_for_visuals(struct dri2_egl_display *dri2_dpy,
-@@ -719,6 +729,7 @@ dri2_x11_add_configs_for_visuals(struct
+@@ -720,6 +730,7 @@ dri2_x11_add_configs_for_visuals(struct
     return EGL_TRUE;
  }
  
@@ -82,7 +82,7 @@
  static EGLBoolean
  dri2_copy_region(_EGLDriver *drv, _EGLDisplay *disp,
  		 _EGLSurface *draw, xcb_xfixes_region_t region)
-@@ -801,6 +812,7 @@ dri2_x11_swap_buffers_msc(_EGLDriver *dr
+@@ -802,6 +813,7 @@ dri2_x11_swap_buffers_msc(_EGLDriver *dr
  
     return swap_count;
  }
@@ -90,7 +90,7 @@
  
  static EGLBoolean
  dri2_x11_swap_buffers(_EGLDriver *drv, _EGLDisplay *disp, _EGLSurface *draw)
-@@ -808,9 +820,13 @@ dri2_x11_swap_buffers(_EGLDriver *drv, _
+@@ -809,9 +821,13 @@ dri2_x11_swap_buffers(_EGLDriver *drv, _
     struct dri2_egl_display *dri2_dpy = dri2_egl_display(disp);
     struct dri2_egl_surface *dri2_surf = dri2_egl_surface(draw);
  
@@ -104,7 +104,7 @@
        assert(dri2_dpy->swrast);
  
        dri2_dpy->core->swapBuffers(dri2_surf->dri_drawable);
-@@ -818,6 +834,7 @@ dri2_x11_swap_buffers(_EGLDriver *drv, _
+@@ -819,6 +835,7 @@ dri2_x11_swap_buffers(_EGLDriver *drv, _
     }
  }
  
@@ -112,7 +112,7 @@
  static EGLBoolean
  dri2_x11_swap_buffers_region(_EGLDriver *drv, _EGLDisplay *disp,
                               _EGLSurface *draw,
-@@ -859,21 +876,26 @@ dri2_x11_post_sub_buffer(_EGLDriver *drv
+@@ -860,21 +877,26 @@ dri2_x11_post_sub_buffer(_EGLDriver *drv
  
     return dri2_x11_swap_buffers_region(drv, disp, draw, 1, rect);
  }
@@ -139,7 +139,7 @@
  
     surf->SwapInterval = interval;
  
-@@ -911,6 +933,7 @@ dri2_x11_copy_buffers(_EGLDriver *drv, _
+@@ -912,6 +934,7 @@ dri2_x11_copy_buffers(_EGLDriver *drv, _
     return EGL_TRUE;
  }
  
@@ -147,23 +147,17 @@
  static _EGLImage *
  dri2_create_image_khr_pixmap(_EGLDisplay *disp, _EGLContext *ctx,
  			     EGLClientBuffer buffer, const EGLint *attr_list)
-@@ -1015,6 +1038,7 @@ dri2_x11_create_image_khr(_EGLDriver *dr
+@@ -1016,7 +1039,9 @@ dri2_x11_create_image_khr(_EGLDriver *dr
        return dri2_create_image_khr(drv, disp, ctx, target, buffer, attr_list);
     }
  }
 +#endif /* HAVE_XCB_DRI2 */
  
- static _EGLImage*
- dri2_x11_swrast_create_image_khr(_EGLDriver *drv, _EGLDisplay *disp,
-@@ -1025,6 +1049,7 @@ dri2_x11_swrast_create_image_khr(_EGLDri
-    return NULL;
- }
- 
 +#ifdef HAVE_XCB_DRI2
  static EGLBoolean
  dri2_x11_get_sync_values(_EGLDisplay *display, _EGLSurface *surface,
                           EGLuint64KHR *ust, EGLuint64KHR *msc,
-@@ -1050,6 +1075,7 @@ dri2_x11_get_sync_values(_EGLDisplay *di
+@@ -1042,6 +1067,7 @@ dri2_x11_get_sync_values(_EGLDisplay *di
  
     return EGL_TRUE;
  }
@@ -171,7 +165,7 @@
  
  static struct dri2_egl_display_vtbl dri2_x11_swrast_display_vtbl = {
     .authenticate = NULL,
-@@ -1068,6 +1094,7 @@ static struct dri2_egl_display_vtbl dri2
+@@ -1060,6 +1086,7 @@ static struct dri2_egl_display_vtbl dri2
     .get_sync_values = dri2_fallback_get_sync_values,
  };
  
@@ -179,7 +173,7 @@
  static struct dri2_egl_display_vtbl dri2_x11_display_vtbl = {
     .authenticate = dri2_x11_authenticate,
     .create_window_surface = dri2_x11_create_window_surface,
-@@ -1085,6 +1112,7 @@ static struct dri2_egl_display_vtbl dri2
+@@ -1077,6 +1104,7 @@ static struct dri2_egl_display_vtbl dri2
     .create_wayland_buffer_from_image = dri2_fallback_create_wayland_buffer_from_image,
     .get_sync_values = dri2_x11_get_sync_values,
  };
@@ -187,7 +181,7 @@
  
  static EGLBoolean
  dri2_initialize_x11_swrast(_EGLDriver *drv, _EGLDisplay *disp)
-@@ -1163,6 +1191,7 @@ dri2_initialize_x11_swrast(_EGLDriver *d
+@@ -1155,6 +1183,7 @@ dri2_initialize_x11_swrast(_EGLDriver *d
     return EGL_FALSE;
  }
  
@@ -195,7 +189,7 @@
  static void
  dri2_x11_setup_swap_interval(struct dri2_egl_display *dri2_dpy)
  {
-@@ -1337,12 +1366,14 @@ dri2_initialize_x11_dri2(_EGLDriver *drv
+@@ -1324,12 +1353,14 @@ dri2_initialize_x11_dri2(_EGLDriver *drv
  
     return EGL_FALSE;
  }
@@ -210,7 +204,7 @@
     int x11_dri2_accel = (getenv("LIBGL_ALWAYS_SOFTWARE") == NULL);
  
     if (x11_dri2_accel) {
-@@ -1350,6 +1381,9 @@ dri2_initialize_x11(_EGLDriver *drv, _EG
+@@ -1337,6 +1368,9 @@ dri2_initialize_x11(_EGLDriver *drv, _EG
           initialized = dri2_initialize_x11_swrast(drv, disp);
        }
     } else {
@@ -220,9 +214,9 @@
        initialized = dri2_initialize_x11_swrast(drv, disp);
     }
  
---- origsrc/mesa-10.5.4/src/egl/main/Makefile.am	2015-04-24 16:09:35.000000000 -0500
-+++ src/mesa-10.5.4/src/egl/main/Makefile.am	2015-05-01 00:51:59.635032800 -0500
-@@ -74,7 +74,6 @@ endif
+--- origsrc/mesa-10.6.2/src/egl/main/Makefile.am	2015-07-12 11:22:22.366311900 -0500
++++ src/mesa-10.6.2/src/egl/main/Makefile.am	2015-07-12 11:21:47.016650300 -0500
+@@ -70,7 +70,6 @@ endif
  
  if HAVE_EGL_DRIVER_DRI2
  AM_CFLAGS += -D_EGL_BUILT_IN_DRIVER_DRI2
