@@ -1,5 +1,5 @@
 NAME="mesa"
-VERSION=10.6.5
+VERSION=10.6.6
 RELEASE=1
 CATEGORY="Libs"
 SUMMARY="X11 OpenGL implementation"
@@ -19,6 +19,7 @@ PATCH_URI="
 	10.3.3-cygwin-shared-llvm.patch
 	10.3.3-drivers-no-undefined.patch
 	10.6.5-egl-swrast.patch
+	10.6.5-cygwin-mcjit.patch
 "
 
 # created by patches

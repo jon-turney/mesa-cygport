@@ -1,0 +1,11 @@
+--- origsrc/mesa-10.6.5/src/gallium/auxiliary/gallivm/lp_bld_misc.cpp	2015-08-22 04:12:36.000000000 -0500
++++ src/mesa-10.6.5/src/gallium/auxiliary/gallivm/lp_bld_misc.cpp	2015-09-03 14:25:44.464368700 -0500
+@@ -451,7 +451,7 @@ lp_build_create_jit_compiler_for_module(
+ #if HAVE_LLVM < 0x0306
+        builder.setUseMCJIT(true);
+ #endif
+-#ifdef _WIN32
++#if defined(_WIN32) || defined(__CYGWIN__)
+        /*
+         * MCJIT works on Windows, but currently only through ELF object format.
+         */
