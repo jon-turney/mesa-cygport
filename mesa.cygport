@@ -1,5 +1,5 @@
 NAME="mesa"
-VERSION=10.6.7
+VERSION=10.6.9
 RELEASE=1
 CATEGORY="Libs"
 SUMMARY="X11 OpenGL implementation"
@@ -15,7 +15,7 @@ PATCH_URI="
 	0016-Add-Windows-DRI.patch
 	0017-For-testing-purposes-only-use-Windows-DRI-if-explici.patch
 	0018-Windows-DRI-fixes.patch
-	10.5.4-cygwin-soname.patch
+	10.6.9-cygwin-soname.patch
 	10.3.3-cygwin-shared-llvm.patch
 	10.3.3-drivers-no-undefined.patch
 	10.6.5-egl-swrast.patch
