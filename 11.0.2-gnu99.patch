@@ -1,0 +1,10 @@
+--- origsrc/mesa-11.0.2/configure.ac	2015-10-08 00:31:00.198937100 -0500
++++ src/mesa-11.0.2/configure.ac	2015-10-08 01:22:48.240390600 -0500
+@@ -246,6 +246,7 @@ solaris*)
+     ;;
+ cygwin*)
+     DEFINES="$DEFINES -D_XOPEN_SOURCE=700"
++    USE_GNU99=yes
+     ;;
+ esac
+ 
