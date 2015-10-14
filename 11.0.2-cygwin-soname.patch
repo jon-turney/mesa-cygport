@@ -20,24 +20,18 @@
  #elif defined(__APPLE__)
  #define DXTN_LIBNAME "libtxc_dxtn.dylib"
  #else
---- origsrc/mesa-11.0.2/src/glx/dri_common.c	2015-10-08 00:23:27.434252800 -0500
-+++ src/mesa-11.0.2/src/glx/dri_common.c	2015-10-08 00:27:18.814629100 -0500
-@@ -97,9 +97,14 @@ driOpenDriver(const char *driverName)
-    const char *libPaths, *p, *next;
-    char realDriverName[200];
-    int len;
+--- origsrc/mesa-11.0.3/src/glx/dri_common.c	2015-10-14 01:01:46.708782700 -0500
++++ src/mesa-11.0.3/src/glx/dri_common.c	2015-10-14 01:06:56.378605800 -0500
+@@ -73,6 +73,9 @@ dri_message(int level, const char *f, ..
+    }
+ }
+ 
 +#ifdef __CYGWIN__
-+   const char *libname = "cygGL-1.dll";
-+#else
-+   const char *libname = "libGL.so.1";
++#define GL_LIB_NAME "cygGL-1.dll"
 +#endif
- 
-    /* Attempt to make sure libGL symbols will be visible to the driver */
--   glhandle = dlopen("libGL.so.1", RTLD_NOW | RTLD_GLOBAL);
-+   glhandle = dlopen(libname, RTLD_NOW | RTLD_GLOBAL);
- 
-    libPaths = NULL;
-    if (geteuid() == getuid()) {
+ #ifndef GL_LIB_NAME
+ #define GL_LIB_NAME "libGL.so.1"
+ #endif
 --- origsrc/mesa-11.0.2/src/mesa/main/texcompress_s3tc.c	2015-09-23 15:04:15.000000000 -0500
 +++ src/mesa-11.0.2/src/mesa/main/texcompress_s3tc.c	2015-10-08 00:27:28.004641800 -0500
 @@ -46,6 +46,8 @@
