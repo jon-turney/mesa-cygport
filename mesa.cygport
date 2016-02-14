@@ -1,6 +1,6 @@
 NAME="mesa"
 VERSION=11.0.9
-RELEASE=1
+RELEASE=2
 CATEGORY="Libs"
 SUMMARY="X11 OpenGL implementation"
 DESCRIPTION="Mesa is an open-source implementation of the OpenGL specification,
@@ -22,8 +22,6 @@ PATCH_URI="
 	10.3.3-cygwin-shared-llvm.patch
 	10.3.3-drivers-no-undefined.patch
 	10.6.5-egl-swrast.patch
-	10.6.5-cygwin-mcjit.patch
-	11.0.2-gnu99.patch
 "
 
 # created by patches
