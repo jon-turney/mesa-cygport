@@ -3,8 +3,8 @@ VERSION=11.2.1
 RELEASE=1
 CATEGORY="Libs"
 SUMMARY="X11 OpenGL implementation"
-DESCRIPTION="Mesa is an open-source implementation of the OpenGL specification,
-a system for rendering interactive 3D graphics.
+DESCRIPTION="Mesa is an open-source implementation of the OpenGL, OpenGL ES,
+and EGL specifications for rendering interactive 3D graphics.
 
 Complete documentation on OpenGL usage and configuration can be found here:
 
