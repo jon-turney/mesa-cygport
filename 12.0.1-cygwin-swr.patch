@@ -1,0 +1,72 @@
+--- origsrc/mesa-12.0.1/src/gallium/drivers/swr/Makefile.am	2016-07-07 10:12:33.000000000 -0500
++++ src/mesa-12.0.1/src/gallium/drivers/swr/Makefile.am	2016-07-08 19:36:11.249719700 -0500
+@@ -106,15 +106,20 @@ rasterizer/jitter/builder_x86.cpp: raste
+ 		--output rasterizer/jitter/builder_x86.cpp \
+ 		--gen_x86_cpp
+ 
++if HAVE_SHARED_GLAPI
++SHARED_GLAPI_LIB = $(top_builddir)/src/mapi/shared-glapi/libglapi.la
++endif
+ 
+ COMMON_LIBADD = \
+ 	$(top_builddir)/src/gallium/auxiliary/libgallium.la \
+ 	$(top_builddir)/src/mesa/libmesagallium.la \
++	$(SHARED_GLAPI_LIB) \
+ 	$(LLVM_LIBS)
+ 
+ COMMON_LDFLAGS = \
+ 	-shared \
+ 	-module \
++	-avoid-version \
+ 	-no-undefined \
+ 	$(GC_SECTIONS) \
+ 	$(NO_UNDEFINED) \
+--- origsrc/mesa-12.0.1/src/gallium/drivers/swr/rasterizer/common/os.h	2016-07-07 10:01:54.000000000 -0500
++++ src/mesa-12.0.1/src/gallium/drivers/swr/rasterizer/common/os.h	2016-07-08 19:24:14.676212500 -0500
+@@ -69,7 +69,7 @@ static inline void AlignedFree(void* p)
+ #define _mm_popcount_sizeT _mm_popcnt_u32
+ #endif
+ 
+-#elif defined(__APPLE__) || defined(FORCE_LINUX) || defined(__linux__) || defined(__gnu_linux__)
++#elif defined(__APPLE__) || defined(FORCE_LINUX) || defined(__linux__) || defined(__gnu_linux__) || defined(__CYGWIN__)
+ 
+ #define SWR_API
+ 
+@@ -90,6 +90,7 @@ typedef unsigned int    UINT;
+ typedef void*           HANDLE;
+ typedef int             LONG;
+ typedef unsigned int    DWORD;
++typedef int64_t         INT64;
+ 
+ #undef FALSE
+ #define FALSE 0
+--- origsrc/mesa-12.0.1/src/gallium/drivers/swr/swr_loader.cpp	2016-06-21 11:26:10.000000000 -0500
++++ src/mesa-12.0.1/src/gallium/drivers/swr/swr_loader.cpp	2016-07-08 18:32:51.405129000 -0500
+@@ -28,6 +28,14 @@
+ #include <stdio.h>
+ #include <dlfcn.h>
+ 
++#ifdef __CYGWIN__
++#define	LIBSWRAVX_SONAME	"cygswrAVX.dll"
++#define	LIBSWRAVX2_SONAME	"cygswrAVX2.dll"
++#else
++#define	LIBSWRAVX_SONAME	"libswrAVX.so"
++#define	LIBSWRAVX2_SONAME	"libswrAVX2.so"
++#endif
++
+ typedef pipe_screen *(*screen_create_proc)(struct sw_winsys *winsys);
+ 
+ struct pipe_screen *
+@@ -40,10 +48,10 @@ swr_create_screen(struct sw_winsys *wins
+    util_cpu_detect();
+    if (util_cpu_caps.has_avx2) {
+       fprintf(stderr, "AVX2\n");
+-      pLibrary = util_dl_open("libswrAVX2.so");
++      pLibrary = util_dl_open(LIBSWRAVX2_SONAME);
+    } else if (util_cpu_caps.has_avx) {
+       fprintf(stderr, "AVX\n");
+-      pLibrary = util_dl_open("libswrAVX.so");
++      pLibrary = util_dl_open(LIBSWRAVX_SONAME);
+    } else {
+       fprintf(stderr, "no AVX/AVX2 support.  Aborting!\n");
+       exit(-1);

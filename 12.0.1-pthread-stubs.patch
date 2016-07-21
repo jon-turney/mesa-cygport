@@ -1,0 +1,10 @@
+--- origsrc/mesa-12.0.1/configure.ac	2016-07-08 18:25:58.831394200 -0500
++++ src/mesa-12.0.1/configure.ac	2016-07-08 18:39:25.976139300 -0500
+@@ -822,7 +822,6 @@ dnl to -pthread, which causes problems i
+ dnl pkgconfig files.
+ test -z "$PTHREAD_LIBS" && PTHREAD_LIBS="-lpthread"
+ 
+-PKG_CHECK_MODULES(PTHREADSTUBS, pthread-stubs)
+ AC_SUBST(PTHREADSTUBS_CFLAGS)
+ AC_SUBST(PTHREADSTUBS_LIBS)
+ 

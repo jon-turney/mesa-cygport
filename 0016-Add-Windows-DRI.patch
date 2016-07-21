@@ -363,7 +363,7 @@ index 0000000..d0f9276
 +   windowsContext *shared = NULL;
 +
 +   int i;
-+   uint32_t renderType;
++   uint32_t renderType = GLX_RGBA_TYPE;
 +
 +   /* Extract renderType from attribs */
 +   for (i = 0; i < num_attribs; i++) {
@@ -1393,7 +1393,7 @@ new file mode 100644
 index 0000000..556173e
 --- /dev/null
 +++ b/src/glx/windows/windowsgl.c
-@@ -0,0 +1,384 @@
+@@ -0,0 +1,397 @@
 +/*
 + * Copyright © 2014 Jon TURNEY
 + *
@@ -1503,11 +1503,17 @@ index 0000000..556173e
 +
 +   gc->ctx = wglCreateContext(hdc);
 +
-+   if (shared)
++   if (shared && gc->ctx)
 +      wglShareLists(shared->ctx, gc->ctx);
 +
 +   ReleaseDC(hwnd, hdc);
 +   DestroyWindow(hwnd);
++
++   if (!gc->ctx)
++   {
++     free(gc);
++     return NULL;
++   }
 +
 +   return gc;
 +}
@@ -1551,15 +1557,22 @@ index 0000000..556173e
 +                               0, 0, 0, 0,
 +                               NULL, NULL, GetModuleHandle(NULL), NULL);
 +   HDC hdc = GetDC(hwnd);
++   HGLRC shareContext = shared ? shared->ctx : NULL;
 +
 +   // We must set the windows pixel format before we can create a WGL context
 +   gc->pxfi = pxfi;
 +   SetPixelFormat(hdc, gc->pxfi, NULL);
 +
-+   gc->ctx = wglCreateContextAttribsARB(hdc, shared->ctx, attribList);
++   gc->ctx = wglCreateContextAttribsARB(hdc, shareContext, attribList);
 +
 +   ReleaseDC(hwnd, hdc);
 +   DestroyWindow(hwnd);
++
++   if (!gc->ctx)
++   {
++     free(gc);
++     return NULL;
++   }
 +
 +   return gc;
 +}
