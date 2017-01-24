@@ -1,0 +1,78 @@
+--- origsrc/mesa-13.0.3/src/gallium/drivers/swr/Makefile.am	2017-01-23 23:39:44.805368400 -0600
++++ src/mesa-13.0.3/src/gallium/drivers/swr/Makefile.am	2017-01-23 21:57:42.699756900 -0600
+@@ -146,14 +146,20 @@ rasterizer/archrast/gen_ar_eventhandlerf
+ 		--output rasterizer/archrast/gen_ar_eventhandlerfile.h \
+ 		--gen_eventhandlerfile_h
+ 
++if HAVE_SHARED_GLAPI
++SHARED_GLAPI_LIB = $(top_builddir)/src/mapi/shared-glapi/libglapi.la
++endif
++
+ COMMON_LIBADD = \
+ 	$(top_builddir)/src/gallium/auxiliary/libgallium.la \
+ 	$(top_builddir)/src/mesa/libmesagallium.la \
++	$(SHARED_GLAPI_LIB) \
+ 	$(LLVM_LIBS)
+ 
+ COMMON_LDFLAGS = \
+ 	-shared \
+ 	-module \
++	-avoid-version \
+ 	-no-undefined \
+ 	$(GC_SECTIONS) \
+ 	$(NO_UNDEFINED) \
+--- origsrc/mesa-13.0.3/src/gallium/targets/dri/Makefile.am	2017-01-23 23:39:44.199973600 -0600
++++ src/mesa-13.0.3/src/gallium/targets/dri/Makefile.am	2017-01-23 23:28:50.049230100 -0600
+@@ -1,10 +1,8 @@
+ include $(top_srcdir)/src/gallium/Automake.inc
+ 
+-if HAVE_ANDROID
+ if HAVE_SHARED_GLAPI
+ SHARED_GLAPI_LIB = $(top_builddir)/src/mapi/shared-glapi/libglapi.la
+ endif
+-endif
+ 
+ AM_CFLAGS = \
+ 	-I$(top_srcdir)/src/mapi \
+@@ -32,6 +30,7 @@ gallium_dri_la_LDFLAGS = \
+ 	-shrext .so \
+ 	-module \
+ 	-avoid-version \
++	-no-undefined \
+ 	$(GC_SECTIONS)
+ 
+ if HAVE_LD_VERSION_SCRIPT
+--- origsrc/mesa-13.0.3/src/gallium/targets/osmesa/Makefile.am	2016-11-10 16:05:17.000000000 -0600
++++ src/mesa-13.0.3/src/gallium/targets/osmesa/Makefile.am	2017-01-23 23:24:38.401629800 -0600
+@@ -63,7 +63,6 @@ lib@OSMESA_LIB@_la_LIBADD = \
+ 	$(top_builddir)/src/gallium/drivers/trace/libtrace.la \
+ 	$(top_builddir)/src/gallium/drivers/softpipe/libsoftpipe.la \
+ 	$(top_builddir)/src/gallium/state_trackers/osmesa/libosmesa.la \
+-	$(top_builddir)/src/mapi/glapi/libglapi.la \
+ 	$(SHARED_GLAPI_LIB) \
+ 	$(OSMESA_LIB_DEPS) \
+ 	$(CLOCK_LIB)
+--- origsrc/mesa-13.0.3/src/mesa/drivers/dri/Makefile.am	2017-01-23 23:39:44.812368700 -0600
++++ src/mesa-13.0.3/src/mesa/drivers/dri/Makefile.am	2017-01-23 23:29:34.466022800 -0600
+@@ -6,12 +6,9 @@ MEGADRIVERS_DEPS =
+ 
+ SUBDIRS+=common
+ 
+-# On Android, we need to explicitly link to libglapi.so.
+-if HAVE_ANDROID
+ if HAVE_SHARED_GLAPI
+ SHARED_GLAPI_LIB = $(top_builddir)/src/mapi/shared-glapi/libglapi.la
+ endif
+-endif
+ 
+ if HAVE_I915_DRI
+ SUBDIRS += i915
+@@ -59,7 +56,7 @@ driinclude_HEADERS = \
+ nodist_EXTRA_mesa_dri_drivers_la_SOURCES = dummy.cpp
+ mesa_dri_drivers_la_SOURCES =
+ mesa_dri_drivers_la_LDFLAGS = \
+-        -module -avoid-version -shared -shrext .so \
++        -module -avoid-version -shared -shrext .so -no-undefined \
+         $(BSYMBOLIC) \
+         $(GC_SECTIONS) \
+         $()
