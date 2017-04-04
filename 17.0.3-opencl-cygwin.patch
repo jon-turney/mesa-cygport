@@ -1,0 +1,19 @@
+With libclc installed and this patch, clover can be built by configuring
+with --enable-opencl --enable-opencl-icd.  Unfortunately, programs hang
+when this is installed, so it seems pipe_swrast isn't supported.
+
+--- origsrc/mesa-17.0.3/src/gallium/targets/opencl/Makefile.am	2017-04-01 10:33:37.000000000 -0500
++++ src/mesa-17.0.3/src/gallium/targets/opencl/Makefile.am	2017-04-04 17:08:50.025278200 -0500
+@@ -18,6 +18,7 @@ lib@OPENCL_LIBNAME@_la_LIBADD = \
+ 	$(top_builddir)/src/gallium/auxiliary/pipe-loader/libpipe_loader_dynamic.la \
+ 	$(top_builddir)/src/gallium/state_trackers/clover/libclover.la \
+ 	$(top_builddir)/src/gallium/auxiliary/libgallium.la \
++	$(top_builddir)/src/compiler/nir/libnir.la \
+ 	$(top_builddir)/src/util/libmesautil.la \
+ 	$(LIBELF_LIBS) \
+ 	$(DLOPEN_LIBS) \
+--- origsrc/mesa-17.0.3/src/gallium/targets/opencl/mesa.icd.in	2017-04-01 10:33:37.000000000 -0500
++++ src/mesa-17.0.3/src/gallium/targets/opencl/mesa.icd.in	2017-04-04 16:27:36.885778200 -0500
+@@ -1 +1 @@
+-lib@OPENCL_LIBNAME@.so.@OPENCL_VERSION@
++cyg@OPENCL_LIBNAME@-@OPENCL_VERSION@.dll
