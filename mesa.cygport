@@ -1,5 +1,5 @@
 NAME="mesa"
-VERSION=13.0.5
+VERSION=17.0.3
 RELEASE=1
 CATEGORY="Libs"
 SUMMARY="X11 OpenGL implementation"
@@ -11,13 +11,13 @@ Complete documentation on OpenGL usage and configuration can be found here:
 http://x.cygwin.com/docs/ug/using-glx.html
 "
 HOMEPAGE="http://www.mesa3d.org/"
-SRC_URI="ftp://ftp.freedesktop.org/pub/mesa/${VERSION}/mesa-${VERSION}.tar.xz"
+SRC_URI="ftp://ftp.freedesktop.org/pub/mesa/mesa-${VERSION}.tar.xz"
 SRC_DIR="mesa-${VERSION}"
 PATCH_URI="
 	0011-Massage-server-fbconfigs-to-make-them-more-likely-to.patch
 	13.0.2-drivers-no-undefined.patch
-	13.0.2-egl-swrast.patch
-	13.0.2-swr-cygwin.patch
+	17.0.3-egl-swrast.patch
+	17.0.3-swr-cygwin.patch
 "
 
 DEPEND="pkgconfig(glproto)
@@ -42,9 +42,14 @@ libGL1_REQUIRES="dri-drivers" # for DRI/swrast
 libGL1_CONTENTS="usr/bin/cygGL-1.dll"
 libGL_devel_SUMMARY="X11 OpenGL library (development)"
 libGL_devel_OBSOLETES="libglapi-devel"
-libGL_devel_CONTENTS="--exclude=osmesa*
-	usr/include/GL/ usr/lib/libGL.dll.a usr/lib/libglapi.dll.a
-	usr/lib/pkgconfig/dri.pc usr/lib/pkgconfig/gl.pc"
+libGL_devel_CONTENTS="
+	--exclude=osmesa*
+	usr/include/GL/
+	usr/lib/libGL.dll.a
+	usr/lib/libglapi.dll.a
+	usr/lib/pkgconfig/dri.pc
+	usr/lib/pkgconfig/gl.pc
+"
 libEGL1_SUMMARY="Embedded GL native platform interface library (runtime)"
 libEGL1_REQUIRES="dri-drivers libglapi0" # for DRI2/swrast
 libEGL1_CONTENTS="usr/bin/cygEGL-1.dll"
@@ -114,5 +119,3 @@ src_test() {
 	cd ${B}
 	make check
 }
-
-KEEP_LA_FILES="none"
