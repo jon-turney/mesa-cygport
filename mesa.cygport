@@ -1,5 +1,5 @@
 NAME="mesa"
-VERSION=17.0.6
+VERSION=17.1.2
 RELEASE=1
 CATEGORY="Libs"
 SUMMARY="X11 OpenGL implementation"
@@ -84,7 +84,7 @@ src_compile() {
 		--disable-asm \
 		--enable-dri --disable-dri3 --enable-driglx-direct \
 		--enable-egl \
-		--enable-gallium-llvm --enable-llvm-shared-libs \
+		--enable-llvm --enable-llvm-shared-libs \
 		--disable-gles1 \
 		--enable-gles2 \
 		--enable-glx \
@@ -95,7 +95,7 @@ src_compile() {
 		--disable-xlib-glx \
 		--with-dri-drivers=swrast \
 		--with-gallium-drivers=swrast \
-		--with-egl-platforms=x11 \
+		--with-platforms=x11 \
 		ax_cv_have_func_attribute_weak=no
 
 	cygmake

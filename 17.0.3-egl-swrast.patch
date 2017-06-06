@@ -12,9 +12,9 @@
 +		])
 +		# XCB_DRI2 is misnamed it's really EGL_X11 or something
 +		PKG_CHECK_MODULES([XCB_DRI2], [$egl_x11_modules])
+ 		DEFINES="$DEFINES -DHAVE_X11_PLATFORM"
  		;;
  
- 	drm)
 --- origsrc/mesa-17.0.3/src/egl/drivers/dri2/egl_dri2.h	2017-04-01 10:33:36.000000000 -0500
 +++ src/mesa-17.0.3/src/egl/drivers/dri2/egl_dri2.h	2017-04-04 12:24:18.574482900 -0500
 @@ -32,7 +32,9 @@
