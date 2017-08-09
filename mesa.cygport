@@ -1,5 +1,5 @@
 NAME="mesa"
-VERSION=17.1.5
+VERSION=17.1.6
 RELEASE=1
 CATEGORY="Libs"
 SUMMARY="X11 OpenGL implementation"
@@ -17,7 +17,6 @@ PATCH_URI="
 	0011-Massage-server-fbconfigs-to-make-them-more-likely-to.patch
 	13.0.2-drivers-no-undefined.patch
 	17.0.3-egl-swrast.patch
-	17.0.3-swr-cygwin.patch
 "
 
 DEPEND="pkgconfig(glproto)

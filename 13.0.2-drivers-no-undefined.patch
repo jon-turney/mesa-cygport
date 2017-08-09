@@ -1,6 +1,6 @@
 --- origsrc/mesa-13.0.3/src/gallium/drivers/swr/Makefile.am	2017-01-23 23:39:44.805368400 -0600
 +++ src/mesa-13.0.3/src/gallium/drivers/swr/Makefile.am	2017-01-23 21:57:42.699756900 -0600
-@@ -146,14 +146,20 @@ rasterizer/archrast/gen_ar_eventhandlerf
+@@ -146,15 +146,21 @@ rasterizer/archrast/gen_ar_eventhandlerf
  		--output rasterizer/archrast/gen_ar_eventhandlerfile.h \
  		--gen_eventhandlerfile_h
  
@@ -12,7 +12,8 @@
  	$(top_builddir)/src/gallium/auxiliary/libgallium.la \
  	$(top_builddir)/src/mesa/libmesagallium.la \
 +	$(SHARED_GLAPI_LIB) \
- 	$(LLVM_LIBS)
+ 	$(LLVM_LIBS) \
+ 	$(PTHREAD_LIBS)
  
  COMMON_LDFLAGS = \
  	-shared \
