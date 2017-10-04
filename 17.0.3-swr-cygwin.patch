@@ -10,6 +10,30 @@
  #else
  #  define UTIL_DL_EXT ".so"
  #  define UTIL_DL_PREFIX "lib"
+--- origsrc/mesa-13.0.3/src/gallium/drivers/swr/Makefile.am	2017-01-23 23:39:44.805368400 -0600
++++ src/mesa-13.0.3/src/gallium/drivers/swr/Makefile.am	2017-01-23 21:57:42.699756900 -0600
+@@ -146,15 +146,21 @@ rasterizer/archrast/gen_ar_eventhandlerf
+ 		--output rasterizer/archrast/gen_ar_eventhandlerfile.h \
+ 		--gen_eventhandlerfile_h
+ 
++if HAVE_SHARED_GLAPI
++SHARED_GLAPI_LIB = $(top_builddir)/src/mapi/shared-glapi/libglapi.la
++endif
++
+ COMMON_LIBADD = \
+ 	$(top_builddir)/src/gallium/auxiliary/libgallium.la \
+ 	$(top_builddir)/src/mesa/libmesagallium.la \
++	$(SHARED_GLAPI_LIB) \
+ 	$(LLVM_LIBS) \
+ 	$(PTHREAD_LIBS)
+ 
+ COMMON_LDFLAGS = \
+ 	-shared \
+ 	-module \
++	-avoid-version \
+ 	-no-undefined \
+ 	$(GC_SECTIONS) \
+ 	$(NO_UNDEFINED) \
 --- origsrc/mesa-17.0.3/src/gallium/drivers/swr/rasterizer/common/os.h	2017-04-01 10:33:37.000000000 -0500
 +++ src/mesa-17.0.3/src/gallium/drivers/swr/rasterizer/common/os.h	2017-04-04 01:55:20.658426200 -0500
 @@ -77,7 +77,7 @@ static inline void AlignedFree(void* p)

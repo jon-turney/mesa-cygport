@@ -1,5 +1,5 @@
 NAME="mesa"
-VERSION=17.1.9
+VERSION=17.2.2
 RELEASE=1
 CATEGORY="Libs"
 SUMMARY="X11 OpenGL implementation"
@@ -14,14 +14,15 @@ HOMEPAGE="http://www.mesa3d.org/"
 SRC_URI="ftp://ftp.freedesktop.org/pub/mesa/mesa-${VERSION}.tar.xz"
 SRC_DIR="mesa-${VERSION}"
 PATCH_URI="
+	http://pkgs.fedoraproject.org/cgit/rpms/mesa.git/plain/0001-Fix-linkage-against-shared-glapi.patch
+	http://pkgs.fedoraproject.org/cgit/rpms/mesa.git/plain/0001-mesa-Squash-merge-of-S3TC-support.patch
 	0011-Massage-server-fbconfigs-to-make-them-more-likely-to.patch
-	13.0.2-drivers-no-undefined.patch
-	17.0.3-egl-swrast.patch
 "
 
 DEPEND="pkgconfig(glproto)
 	pkgconfig(x11)
 	pkgconfig(x11-xcb)
+	pkgconfig(xcb-dri2)
 	pkgconfig(xcb-glx)
 	pkgconfig(xext)
 	pkgconfig(xfixes)
@@ -60,13 +61,11 @@ libGLESv2_devel_SUMMARY="OpenGL ES 2.0/3.0 library (development)"
 libGLESv2_devel_REQUIRES="libEGL-devel"
 libGLESv2_devel_CONTENTS="usr/include/GLES[23]/ usr/lib/libGLESv2.* usr/lib/pkgconfig/glesv2.pc"
 libOSMesa8_SUMMARY="Mesa Off_Screen Rendering library (runtime)"
-libOSMesa8_REQUIRES="libtxc_dxtn"
 libOSMesa8_CONTENTS="usr/bin/cygOSMesa-8.dll"
 libOSMesa_devel_SUMMARY="Mesa Off-Screen rendering library (development)"
 libOSMesa_devel_REQUIRES="libGL-devel"
 libOSMesa_devel_CONTENTS="usr/include/GL/osmesa.h usr/lib/libOSMesa.* usr/lib/pkgconfig/osmesa.pc"
 dri_drivers_SUMMARY="OpenGL DRI drivers"
-dri_drivers_REQUIRES="libtxc_dxtn"
 dri_drivers_CONTENTS="etc/ usr/lib/dri/" # usr/lib/cygswrAVX*.dll"
 windowsdriproto_SUMMARY="Windows-DRI extension headers"
 windowsdriproto_CONTENTS="usr/include/X11/ usr/lib/pkgconfig/windowsdriproto.pc"
