@@ -1,5 +1,5 @@
 NAME="mesa"
-VERSION=17.2.6
+VERSION=17.3.1
 RELEASE=1
 CATEGORY="Libs"
 SUMMARY="X11 OpenGL implementation"
@@ -15,7 +15,6 @@ SRC_URI="ftp://ftp.freedesktop.org/pub/mesa/mesa-${VERSION}.tar.xz"
 SRC_DIR="mesa-${VERSION}"
 PATCH_URI="
 	http://pkgs.fedoraproject.org/cgit/rpms/mesa.git/plain/0001-Fix-linkage-against-shared-glapi.patch
-	http://pkgs.fedoraproject.org/cgit/rpms/mesa.git/plain/0001-mesa-Squash-merge-of-S3TC-support.patch
 	0011-Massage-server-fbconfigs-to-make-them-more-likely-to.patch
 "
 
