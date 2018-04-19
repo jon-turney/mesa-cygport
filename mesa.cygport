@@ -1,5 +1,7 @@
+inherit meson
+
 NAME="mesa"
-VERSION=17.3.8
+VERSION=18.0.1
 RELEASE=1
 CATEGORY="Libs"
 SUMMARY="X11 OpenGL implementation"
@@ -14,8 +16,8 @@ HOMEPAGE="http://www.mesa3d.org/"
 SRC_URI="ftp://ftp.freedesktop.org/pub/mesa/mesa-${VERSION}.tar.xz"
 SRC_DIR="mesa-${VERSION}"
 PATCH_URI="
-	http://pkgs.fedoraproject.org/cgit/rpms/mesa.git/plain/0001-Fix-linkage-against-shared-glapi.patch
 	0011-Massage-server-fbconfigs-to-make-them-more-likely-to.patch
+	18.0.1-meson-egl_dri2.patch
 "
 
 DEPEND="pkgconfig(glproto)
@@ -71,48 +73,34 @@ windowsdriproto_CONTENTS="usr/include/X11/ usr/lib/pkgconfig/windowsdriproto.pc"
 
 DIFF_EXCLUDES="docs *.c.out"
 
-src_compile() {
-	cd ${S}
-	cygautoreconf
-	cd ${B}
-	cygconf \
-		--enable-shared --disable-static \
-		--enable-shared-glapi \
-		--disable-asm \
-		--enable-dri --disable-dri3 --enable-driglx-direct \
-		--enable-egl \
-		--enable-llvm --enable-llvm-shared-libs \
-		--disable-gles1 \
-		--enable-gles2 \
-		--enable-glx \
-		--enable-glx-tls \
-		--disable-openvg \
-		--enable-osmesa \
-		--enable-texture-float \
-		--disable-xlib-glx \
-		--with-dri-drivers=swrast \
-		--with-gallium-drivers=swrast \
-		--with-platforms=x11 \
-		ax_cv_have_func_attribute_weak=no
-
-	cygmake
-}
+CYGMESON_ARGS="
+	-Dplatforms=x11
+	-Ddri3=false
+	-Ddri-drivers=''
+	-Dgallium-drivers=swrast
+	-Dvulkan-drivers=''
+	-Dshared-glapi=true
+	-Dgles1=false
+	-Dgles2=true
+	-Dopengl=true
+	-Dgbm=false
+	-Dglx=dri
+	-Degl=true
+	-Dglvnd=false
+	-Dasm=false
+	-Dllvm=true
+	-Dtexture-float=true
+	-Dosmesa=gallium
+	-Dosmesa-bits=8
+"
 
 src_install() {
-	cd ${B}
-	dodir /usr/bin
-	cyginstall
+	cd ${S}
+	meson_install
 
 	cd ${S}/docs
 	dodoc COPYING README.CYGWIN libGL.txt
 
 	docinto html
 	dodoc *.html *.css *.png specs specs/old relnotes
-}
-
-# cannot use the default src_test, as 'make -n check' fails the first time as
-# there are no proper dependencies on src/gtest, so provide our own.
-src_test() {
-	cd ${B}
-	make check
 }
