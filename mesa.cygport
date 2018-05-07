@@ -1,7 +1,7 @@
 inherit meson
 
 NAME="mesa"
-VERSION=18.0.2
+VERSION=18.0.3
 RELEASE=1
 CATEGORY="Libs"
 SUMMARY="X11 OpenGL implementation"
