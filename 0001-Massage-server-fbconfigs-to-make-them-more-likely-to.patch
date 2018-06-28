@@ -1,22 +1,21 @@
-From 3765aa3cb9f791d6da0c5fddc880c370460158d6 Mon Sep 17 00:00:00 2001
-From: Jon TURNEY <jon.turney@dronecode.org.uk>
-Date: Sat, 10 May 2014 10:59:39 +0100
-Subject: [PATCH 11/11] Massage server fbconfigs to make them more likely to
+From 23ec6dc4da6d3498285c4296419c9305ccee3453 Mon Sep 17 00:00:00 2001
+From: Jon Turney <jon.turney@dronecode.org.uk>
+Date: Thu, 28 Jun 2018 14:05:37 +0100
+Subject: [PATCH 1/2] Massage server fbconfigs to make them more likely to
  match swrast's fbconfigs
 
-- Ignore server performance caveats (doesn't make a great deal of sense to match
-those)
-- Ignore server aux buf count (swrast doesn't provide any, but the server may
-provide them for all fbconfigs)
+- Ignore server performance caveats (doesn't make a great deal of sense to
+match those)
 
-Signed-off-by: Jon TURNEY <jon.turney@dronecode.org.uk>
+- Ignore server aux buf count (swrast doesn't provide any, but the server
+may provide them for all fbconfigs)
 ---
  src/glx/dri_common.c |  3 +++
- src/glx/drisw_glx.c  | 27 +++++++++++++++++++++++++++
- 2 files changed, 30 insertions(+)
+ src/glx/drisw_glx.c  | 21 +++++++++++++++++++++
+ 2 files changed, 24 insertions(+)
 
 diff --git a/src/glx/dri_common.c b/src/glx/dri_common.c
-index 8bf4705..dd78450 100644
+index ab5d6c5bc0..16ab2b5566 100644
 --- a/src/glx/dri_common.c
 +++ b/src/glx/dri_common.c
 @@ -294,6 +294,9 @@ driConfigEqual(const __DRIcoreExtension *core,
@@ -30,10 +29,10 @@ index 8bf4705..dd78450 100644
              glxValue = GLX_NON_CONFORMANT_CONFIG;
           else if (value & __DRI_ATTRIB_SLOW_BIT)
 diff --git a/src/glx/drisw_glx.c b/src/glx/drisw_glx.c
-index fcb5d8f..ddfdcd4 100644
+index df2467a5c2..9d64c5efe5 100644
 --- a/src/glx/drisw_glx.c
 +++ b/src/glx/drisw_glx.c
-@@ -730,6 +730,33 @@ driswCreateScreen(int screen, struct glx_display *priv)
+@@ -720,6 +720,27 @@ driswCreateScreen(int screen, struct glx_display *priv)
     extensions = psc->core->getExtensions(psc->driScreen);
     driswBindExtensions(psc, extensions);
 
@@ -53,19 +52,13 @@ index fcb5d8f..ddfdcd4 100644
 +   }
 +
 +   for (struct glx_config *m = psc->base.visuals; m; m = m->next) {
++      /* Ditto for visuals */
 +      m->visualRating = GLX_DONT_CARE;
 +      m->numAuxBuffers = 0;
-+   }
-+
-+   for (struct glx_config *m = psc->base.configs; m; m = m->next) {
-+
-+   }
-+   for (struct glx_config *m = psc->base.visuals; m; m = m->next) {
-+
 +   }
 +
     configs = driConvertConfigs(psc->core, psc->base.configs, driver_configs);
     visuals = driConvertConfigs(psc->core, psc->base.visuals, driver_configs);
 
 --
-1.8.5.5
+2.17.0
