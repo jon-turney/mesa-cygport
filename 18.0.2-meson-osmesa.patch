@@ -7,8 +7,8 @@
 -  link_whole : [libosmesa_st],
 +  link_whole : [libglapi_static, libosmesa_st],
    link_with : [
--    libmesa_gallium, libgallium, libglapi_static, libws_null, libtrace,
-+    libmesa_gallium, libgallium, libws_null, libtrace,
-     osmesa_link_with,
+-    libmesa_gallium, libgallium, libglapi_static, libws_null, osmesa_link_with,
++    libmesa_gallium, libgallium, libws_null, osmesa_link_with,
    ],
    dependencies : [
+     dep_selinux, dep_thread, dep_clock, dep_unwind,

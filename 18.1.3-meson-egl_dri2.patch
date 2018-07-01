@@ -1,0 +1,19 @@
+--- origsrc/mesa-18.1.3/src/egl/meson.build	2018-06-29 12:47:29.000000000 -0500
++++ src/mesa-18.1.3/src/egl/meson.build	2018-07-01 17:56:06.637852400 -0500
+@@ -85,7 +85,7 @@ g_egldispatchstubs_h = custom_target(
+   capture : true,
+ )
+ 
+-if with_dri2
++if with_dri2 or with_platform_x11
+   files_egl += files(
+     'drivers/dri2/egl_dri2.c',
+     'drivers/dri2/egl_dri2.h',
+@@ -103,6 +103,7 @@ if with_platform_x11
+     files_egl += files('drivers/dri2/platform_x11_dri3.c')
+     link_for_egl += libloader_dri3_helper
+   endif
++  incs_for_egl += inc_loader
+   deps_for_egl += [dep_x11_xcb, dep_xcb_dri2, dep_xcb_xfixes]
+ endif
+ if with_platform_drm
