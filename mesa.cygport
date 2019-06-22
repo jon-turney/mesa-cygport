@@ -19,6 +19,7 @@ PATCH_URI="
 	18.1.3-meson-egl_dri2.patch
 	19.1.2-meson-gallium_egl.patch
 	0001-Massage-server-fbconfigs-to-make-them-more-likely-to.patch
+	0003-Turn-off-DPI-virtualization-for-Windows-DRI-Windows.patch
 "
 
 DEPEND="pkgconfig(glproto)
