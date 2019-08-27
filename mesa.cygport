@@ -1,7 +1,7 @@
 inherit meson
 
 NAME="mesa"
-VERSION=18.1.3
+VERSION=19.1.5
 RELEASE=1
 CATEGORY="Libs"
 SUMMARY="X11 OpenGL implementation"
@@ -13,12 +13,12 @@ Complete documentation on OpenGL usage and configuration can be found here:
 http://x.cygwin.com/docs/ug/using-glx.html
 "
 HOMEPAGE="http://www.mesa3d.org/"
-SRC_URI="ftp://ftp.freedesktop.org/pub/mesa/mesa-${VERSION}.tar.xz"
+SRC_URI="https://mesa.freedesktop.org/archive/mesa-${VERSION}.tar.xz"
 SRC_DIR="mesa-${VERSION}"
 PATCH_URI="
 	0011-Massage-server-fbconfigs-to-make-them-more-likely-to.patch
 	18.1.3-meson-egl_dri2.patch
-	18.0.2-meson-osmesa.patch
+	19.1.2-meson-gallium_egl.patch
 "
 
 DEPEND="pkgconfig(glproto)
@@ -68,18 +68,17 @@ libOSMesa_devel_SUMMARY="Mesa Off-Screen rendering library (development)"
 libOSMesa_devel_REQUIRES="libGL-devel"
 libOSMesa_devel_CONTENTS="usr/include/GL/osmesa.h usr/lib/libOSMesa.* usr/lib/pkgconfig/osmesa.pc"
 dri_drivers_SUMMARY="OpenGL DRI drivers"
-dri_drivers_CONTENTS="etc/ usr/lib/dri/" # usr/lib/cygswrAVX*.dll"
+dri_drivers_CONTENTS="usr/lib/dri/*.so usr/share/drirc.d/" # usr/lib/cygswrAVX*.dll"
 windowsdriproto_SUMMARY="Windows-DRI extension headers"
 windowsdriproto_CONTENTS="usr/include/X11/ usr/lib/pkgconfig/windowsdriproto.pc"
+PKG_IGNORE="usr/lib/dri/libgallium_dri.dll.a"
 
 DIFF_EXCLUDES="docs *.c.out"
 
 CYGMESON_ARGS="
 	-Dplatforms=x11
 	-Ddri3=false
-	-Ddri-drivers=''
 	-Dgallium-drivers=swrast
-	-Dvulkan-drivers=''
 	-Dshared-glapi=true
 	-Dgles1=false
 	-Dgles2=true

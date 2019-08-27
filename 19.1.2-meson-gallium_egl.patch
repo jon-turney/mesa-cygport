@@ -1,0 +1,11 @@
+--- origsrc/mesa-19.1.2/src/gallium/targets/dri/meson.build	2019-07-09 05:10:45.000000000 -0400
++++ src/mesa-19.1.2/src/gallium/targets/dri/meson.build	2019-07-22 13:30:54.815405400 -0400
+@@ -37,7 +37,7 @@ if with_ld_dynamic_list
+   gallium_dri_link_depends += files('../dri-vdpau.dyn')
+ endif
+ 
+-libgallium_dri = shared_library(
++libgallium_dri = shared_module(
+   'gallium_dri',
+   [files('target.c'), xmlpool_options_h],
+   include_directories : [
