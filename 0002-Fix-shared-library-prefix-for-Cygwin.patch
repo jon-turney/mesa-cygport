@@ -1,0 +1,80 @@
+From 7564cf74b237d04100046988c88c7aea36814682 Mon Sep 17 00:00:00 2001
+From: Jon Turney <jon.turney@dronecode.org.uk>
+Date: Fri, 10 Apr 2020 23:13:30 +0100
+Subject: [PATCH] Fix shared library prefix for Cygwin
+
+Revert 63f5aee6 we use the default shared library prefix, rather than
+always using 'lib', which is incorrect on Cygwin.
+
+Revert 1a058119 likewise
+---
+ src/gallium/targets/osmesa/meson.build | 1 -
+ src/mapi/es1api/meson.build            | 1 -
+ src/mapi/es2api/meson.build            | 1 -
+ src/mapi/shared-glapi/meson.build      | 1 -
+ src/mesa/drivers/osmesa/meson.build    | 1 -
+ 5 files changed, 5 deletions(-)
+
+diff --git a/src/gallium/targets/osmesa/meson.build b/src/gallium/targets/osmesa/meson.build
+index db10fe03cf3..7792aa1e2fc 100644
+--- a/src/gallium/targets/osmesa/meson.build
++++ b/src/gallium/targets/osmesa/meson.build
+@@ -58,7 +58,6 @@ libosmesa = shared_library(
+     dep_ws2_32, dep_selinux, dep_thread, dep_clock, dep_unwind,
+     driver_swrast, driver_swr,
+   ],
+-  name_prefix : host_machine.system() == 'windows' ? '' : 'lib',  # otherwise mingw will create libosmesa.dll
+   soversion : host_machine.system() == 'windows' ? '' : '8',
+   version : '8.0.0',
+   install : true,
+diff --git a/src/mapi/es1api/meson.build b/src/mapi/es1api/meson.build
+index 9d97dd67c40..fec4e04128c 100644
+--- a/src/mapi/es1api/meson.build
++++ b/src/mapi/es1api/meson.build
+@@ -49,7 +49,6 @@ libglesv1_cm = shared_library(
+   dependencies : [dep_thread, dep_libdrm, dep_m, dep_dl],
+   soversion : host_machine.system() == 'windows' ? '' : '1',
+   version : '1.1.0',
+-  name_prefix : 'lib',
+   install : true,
+ )
+ 
+diff --git a/src/mapi/es2api/meson.build b/src/mapi/es2api/meson.build
+index cb7bd41ad42..e0a52067c55 100644
+--- a/src/mapi/es2api/meson.build
++++ b/src/mapi/es2api/meson.build
+@@ -49,7 +49,6 @@ libgles2 = shared_library(
+   dependencies : [dep_thread, dep_libdrm, dep_m, dep_dl],
+   soversion : host_machine.system() == 'windows' ? '' : '2',
+   version : '2.0.0',
+-  name_prefix : 'lib',
+   install : true,
+ )
+ 
+diff --git a/src/mapi/shared-glapi/meson.build b/src/mapi/shared-glapi/meson.build
+index 7d0fe115d63..5d10b833f1d 100644
+--- a/src/mapi/shared-glapi/meson.build
++++ b/src/mapi/shared-glapi/meson.build
+@@ -57,7 +57,6 @@ libglapi = shared_library(
+   dependencies : [dep_thread, dep_selinux],
+   soversion : host_machine.system() == 'windows' ? '' : '0',
+   version : '0.0.0',
+-  name_prefix : 'lib',
+   install : true,
+ )
+ 
+diff --git a/src/mesa/drivers/osmesa/meson.build b/src/mesa/drivers/osmesa/meson.build
+index f9ba2c5ade9..901d8615e33 100644
+--- a/src/mesa/drivers/osmesa/meson.build
++++ b/src/mesa/drivers/osmesa/meson.build
+@@ -36,7 +36,6 @@ libosmesa = shared_library(
+   link_whole : libglapi_static,
+   link_with : [libmesa_classic, osmesa_link_with],
+   dependencies : [dep_thread, dep_selinux],
+-  name_prefix : host_machine.system() == 'windows' ? '' : 'lib',  # otherwise mingw will create libosmesa.dll
+   soversion : host_machine.system() == 'windows' ? '' : '8',
+   version : '8.0.0',
+   install : true,
+-- 
+2.21.0
+

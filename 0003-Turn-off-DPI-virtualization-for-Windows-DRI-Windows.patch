@@ -1,4 +1,4 @@
-From 1151e9efe54c16407c33449de1e53ca277f5a503 Mon Sep 17 00:00:00 2001
+From f5af3d5f1d2cdf97a5650d334eef1a0dfb77ede0 Mon Sep 17 00:00:00 2001
 From: Jon Turney <jon.turney@dronecode.org.uk>
 Date: Sun, 14 Oct 2018 17:25:20 +0100
 Subject: [PATCH] Turn off DPI virtualization for Windows-DRI Windows
@@ -8,41 +8,38 @@ See https://cygwin.com/ml/cygwin/2018-10/msg00088.html
 This is perhaps better than updating the default manifest for all Cygwin
 programs to include dpiAware.
 
-Use GetProcAddress() because SetProcessDPIAware() isn't in the w32api
-implibs yet.
+v2:
+Simplify for SetProcessDPIAware() appearing in the w32api implibs
 ---
- src/glx/windows/windowsgl.c | 14 ++++++++++++++
- 1 file changed, 14 insertions(+)
+ src/glx/windows/windowsgl.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
 
 diff --git a/src/glx/windows/windowsgl.c b/src/glx/windows/windowsgl.c
-index 56849da8371..2bdadea5552 100644
+index 73366b20ab8..37a15dff437 100644
 --- a/src/glx/windows/windowsgl.c
 +++ b/src/glx/windows/windowsgl.c
-@@ -376,11 +376,25 @@ windows_extensions_test(HDC hdc, void *args)
-    r->wgl_extensions = strdup(wglGetExtensionsStringARB(hdc));
- }
-
-+typedef BOOL (WINAPI *PFNSPDI)();
+@@ -21,6 +21,8 @@
+  * IN THE SOFTWARE.
+  */
+ 
++#define _WIN32_WINNT 0x0600
 +
- void
- windows_extensions(char **gl_extensions, char **wgl_extensions)
+ #include "windowsgl.h"
+ #include "windowsgl_internal.h"
+ 
+@@ -381,6 +383,12 @@ windows_extensions(char **gl_extensions, char **wgl_extensions)
  {
     windows_extensions_result result;
-
+ 
 +   /*
 +      We don't want dpi virtualisation for any OpenGL windows.
 +      (must occur before any windows are created)
 +   */
-+   HMODULE hMod = GetModuleHandle("user32.dll");
-+   if (hMod) {
-+      PFNSPDI pFnSPDI = (PFNSPDI)GetProcAddress(hMod, "SetProcessDPIAware");
-+      if (pFnSPDI) {
-+         (*pFnSPDI)();
-+      }
-+   }
++   SetProcessDPIAware();
 +
     *gl_extensions = "";
     *wgl_extensions = "";
-
---
+ 
+-- 
 2.21.0
+
